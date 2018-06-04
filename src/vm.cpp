@@ -48,14 +48,22 @@ namespace gb_emu
 					break;
 				case Opcode_Arithmetic_Command::ADC:
 				{
-					uint8_t carry = getFlag(Flag::C);
-					setRegister(Register::A, regA + value + carry);
-					(regA + value + carry == 0) ? setFlag(Flag::Z) : clearFlag(Flag::Z);
-					uint16_t bigRegA = regA, bigValue = value;
-					regA &= 0x0F;
-					value &= 0x0F;
-					(regA + value + carry > 0x0F) ? setFlag(Flag::H) : clearFlag(Flag::H);
-					(bigRegA + bigValue + carry > 0xF0) ? setFlag(Flag::C) : clearFlag(Flag::C);
+					// May need to upgrade this to a uint16_t to prevent C++
+					// unsigned modulo behaviour
+					uint8_t outValue;
+					if(getFlag(Flag::C))
+					{
+						(regA >= 0xFF - value) ? setFlag(Flag::C) : clearFlag(Flag::C);
+						outValue = regA + value + 1;
+					}
+					else
+					{
+						(regA > 0xFF - value) ? setFlag(Flag::C) : clearFlag(Flag::C);
+						outValue = regA + value;
+					}
+					uint8_t carryIns = regA ^ value ^ outValue;
+					((carryIns >> 4) & 1) ? setFlag(Flag::H) : clearFlag(Flag::H);
+					setRegister(Register::A, outValue);
 					clearFlag(Flag::N);
 				}
 				break;
