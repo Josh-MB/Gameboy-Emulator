@@ -20,7 +20,9 @@ namespace gb_emu
 	}
 
 	enum class Opcode : uint8_t {
-		LD_r1_r2 = 0x40,
+		// HALT (p.97)
+		// Power down CPU unitl interrupt occurs (saves power). 4 cycles
+		HALT = 0x76,
 	};
 
 	enum class Opcode_Register : uint8_t {

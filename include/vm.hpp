@@ -1,7 +1,9 @@
 #pragma once
 
-#include <cstdint>
 #include "common.hpp"
+#include "op_code.hpp"
+#include "debug.hpp"
+#include <cstdint>
 
 namespace gb_emu
 {
@@ -14,6 +16,8 @@ namespace gb_emu
 		L,
 		A,
 		F,
+		HL_UNUSED_UPPER, // Fake registers to make converting from opcode register
+		HL_UNUSED_LOWER, // to actual registers easier
 	};
 
 	enum class RegisterPair : uint8_t {
@@ -22,6 +26,17 @@ namespace gb_emu
 		HL = 2,
 		AF = 3,
 	};
+
+	constexpr Register getRegister_from_OpcodeRegister(Opcode_Register r) {
+		if(r == Opcode_Register::A) {
+			return Register::A;
+		}
+		else if(r == Opcode_Register::HL) {
+			return Register::HL_UNUSED_UPPER;
+		}
+		else
+			return static_cast<Register>(r);
+	}
 
 	enum class Flag : uint8_t {
 		Z = 7, // Set if result is zero
@@ -44,14 +59,19 @@ namespace gb_emu
 		uint16_t PC;
 
 		union {
-			uint8_t registers[8];
-			uint16_t registerPairs[4];
+			// Last two registers are fake registers such that
+			// getRegister[HL_UNUSED_UPPER/LOWER] does not corrupt memory
+			uint8_t registers[10];
+			uint16_t registerPairs[5];
 		};
 
+
+		
 		// 16 bytes of memory
 		uint8_t memory[0xFFFF];
 
 		uint8_t getRegister(Register r) const {
+			CHECK_REGISTER(r);
 			return registers[toUType(r)];
 		}
 
@@ -60,6 +80,7 @@ namespace gb_emu
 		}
 
 		void setRegister(Register r, uint8_t value) {
+			CHECK_REGISTER(r);
 			registers[toUType(r)] = value;
 		}
 

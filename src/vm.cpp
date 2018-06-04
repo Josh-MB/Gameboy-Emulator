@@ -13,31 +13,25 @@ namespace gb_emu
 				break;
 			case Opcode_Group::LD:
 			{
-				Opcode_Register r1 = static_cast<Opcode_Register>(instruction | 0x38);
-				Opcode_Register r2 = static_cast<Opcode_Register>(instruction | 0x07);
-				if(r1 == Opcode_Register::HL && r2 == Opcode_Register::HL) {
+				if(static_cast<Opcode>(instruction) == Opcode::HALT) {
 					// Halt
 				}
 				else {
+					Opcode_Register r1 = static_cast<Opcode_Register>(instruction | 0x38);
+					Opcode_Register r2 = static_cast<Opcode_Register>(instruction | 0x07);
 					uint8_t value;
 					if(r2 == Opcode_Register::HL) {
 						value = getByte(registerPairs[toUType(RegisterPair::HL)]);
 					}
-					else if(r2 == Opcode_Register::A) {
-						value = getRegister(Register::A);
-					}
 					else {
-						value = getRegister(static_cast<Register>(r2));
+						value = getRegister(getRegister_from_OpcodeRegister(r2));
 					}
 
 					if(r1 == Opcode_Register::HL) {
 						setByte(registerPairs[toUType(RegisterPair::HL)], value);
 					}
-					else if(r2 == Opcode_Register::A) {
-						setRegister(Register::A, value);
-					}
 					else {
-						setRegister(static_cast<Register>(r1), value);
+						setRegister(getRegister_from_OpcodeRegister(r1), value);
 					}
 				}
 			}
