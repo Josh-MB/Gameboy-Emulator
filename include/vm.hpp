@@ -39,10 +39,10 @@ namespace gb_emu
 	}
 
 	enum class Flag : uint8_t {
-		Z = 7, // Set if result is zero
-		N = 6, // Set if subtract
-		H = 5, // Set if half carry
-		C = 4, // Set if carry
+		Z = 1<<7, // Set if result is zero
+		N = 1<<6, // Set if subtract
+		H = 1<<5, // Set if half carry
+		C = 1<<4, // Set if carry
 	};
 
 	enum class ExecuteResult {
