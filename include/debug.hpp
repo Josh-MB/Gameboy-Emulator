@@ -10,7 +10,7 @@ namespace gb_emu
 	enum class Register : uint8_t;
 	void check_register(Register r);
 
-#ifdef GB_DEBUG
+#ifdef _DEBUG
 #define CHECK_REGISTER(r) (check_register(r))
 #else
 #define CHECK_REGISTER(r) (sizeof(r))
