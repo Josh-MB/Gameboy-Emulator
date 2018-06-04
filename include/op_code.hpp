@@ -5,10 +5,46 @@
 namespace gb_emu
 {
 	/**
+	 * GB Opcodes deconstructed into sub-byte components
+	 */
+	enum class Opcode_Group : uint8_t {
+		MISC1 = 0x00,
+		LD = 0x40,
+		ARITH = 0x80,
+		MISC2 = 0xC0,
+		MASK = 0xC0,
+	};
+
+	constexpr Opcode_Group operator & (Opcode_Group lhs, Opcode_Group rhs) {
+		return static_cast<Opcode_Group>(static_cast<uint8_t>(lhs) & static_cast<uint8_t>(rhs));
+	}
+
+	enum class Opcode : uint8_t {
+		LD_r1_r2 = 0x40,
+	};
+
+	enum class Opcode_Register : uint8_t {
+		A = 0x7,
+		B = 0x0,
+		C = 0x1,
+		D = 0x2,
+		E = 0x3,
+		H = 0x4,
+		L = 0x5,
+		HL = 0x6,
+	};
+
+	/*struct LD_Op {
+		Opcode op;
+		Register r1, r2;
+		LD_Op(uint8_t opcode) : op{opcode & static_cast<uint8_t>(Opcode_Group::MASK)}, r1(opcode & 0x38), r2(opcode & 0x07) {}
+	};*/
+
+	/**
 	 * GB Opcodes as provided by the GP CPU Manual from p.65
 	 * onwards.
 	 */
-	enum class Opcode : uint8_t {
+	enum class Opcode_Exact : uint8_t {
 		// NOP (p.97)
 		// 4 cycles
 		NOP = 0x00,
@@ -85,16 +121,16 @@ namespace gb_emu
 		// LD A,n (p.68)
 		// Single register instructions are 4 cycles
 		// Paired register instructions are 8 cycles
-		LD_A_A = 0x7F, /** 4 cycles vvv */
-		LD_A_B = 0x78,
-		LD_A_C = 0x79,
-		LD_A_D = 0x7A,
-		LD_A_E = 0x7B,
-		LD_A_H = 0x7C,
-		LD_A_L = 0x7D,
+		//LD_A_A = 0x7F, /** 4 cycles vvv */
+		//LD_A_B = 0x78,
+		//LD_A_C = 0x79,
+		//LD_A_D = 0x7A,
+		//LD_A_E = 0x7B,
+		//LD_A_H = 0x7C,
+		//LD_A_L = 0x7D,
 		LD_A_BC = 0x0A, /** 8 cycles vvv */
 		LD_A_DE = 0x1A,
-		LD_A_HL = 0x7E,
+		//LD_A_HL = 0x7E,
 		LD_A_n = 0x3E, /** n=8 bit immediate value */
 		LD_A_nn = 0xFA, /** 16 cycles. nn=16 bit immediate value (LS byte first) */
 
@@ -313,7 +349,7 @@ namespace gb_emu
 		INC_E = 0x1C,
 		INC_H = 0x24,
 		INC_L = 0x2C,
-		INC_HL = 0x34, /** 12 cycles */
+		INC_addressHL = 0x34, /** 12 cycles */
 
 		// DEC n (p.89)
 		// Decrement register
@@ -326,7 +362,7 @@ namespace gb_emu
 		DEC_E = 0x1D,
 		DEC_H = 0x25,
 		DEC_L = 0x2D,
-		DEC_HL = 0x35, /** 12 cycles */
+		DEC_addressHL = 0x35, /** 12 cycles */
 
 		// ADD HL,n (p.90)
 		// Add n to HL (2 byte arithmetic)
@@ -498,15 +534,9 @@ namespace gb_emu
 			// then enable interupts
 			// 8 cycles
 			RETI = 0xD9,
-
-
-
-
-
-
 	};
 
-	enum class CB_Opcode : uint8_t {
+	enum class CB_Opcode_Exact : uint8_t {
 		// SWAP n (p.94)
 		// Swap upper and lower nibbles of n
 		// 8 cycles except as marked
