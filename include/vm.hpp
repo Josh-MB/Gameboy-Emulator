@@ -116,6 +116,10 @@ namespace gb_emu
 			memory[address] = value;
 		}
 
+		void setFlag(Flag f, bool state) {
+			registers[toUType(Register::F)] |= (state * toUType(f));
+		}
+
 		void setFlag(Flag f) {
 			registers[toUType(Register::F)] |= toUType(f);
 		}

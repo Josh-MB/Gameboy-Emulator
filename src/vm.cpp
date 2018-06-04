@@ -37,12 +37,12 @@ namespace gb_emu
 				case Opcode_Arithmetic_Command::ADD:
 				{
 					setRegister(Register::A, regA + value);
-					(regA + value == 0) ? setFlag(Flag::Z) : clearFlag(Flag::Z);
+					setFlag(Flag::Z, (regA + value == 0));
 					uint16_t bigRegA = regA, bigValue = value;
 					regA &= 0x0F;
 					value &= 0x0F;
-					(regA + value > 0x0F) ? setFlag(Flag::H) : clearFlag(Flag::H);
-					(bigRegA + bigValue > 0xF0) ? setFlag(Flag::C) : clearFlag(Flag::C);
+					setFlag(Flag::H, (regA + value > 0x0F));
+					setFlag(Flag::C, (bigRegA + bigValue > 0xF0));
 					clearFlag(Flag::N);
 				}
 					break;
@@ -53,16 +53,16 @@ namespace gb_emu
 					uint8_t outValue;
 					if(getFlag(Flag::C))
 					{
-						(regA >= 0xFF - value) ? setFlag(Flag::C) : clearFlag(Flag::C);
+						setFlag(Flag::C, (regA >= 0xFF - value));
 						outValue = regA + value + 1;
 					}
 					else
 					{
-						(regA > 0xFF - value) ? setFlag(Flag::C) : clearFlag(Flag::C);
+						setFlag(Flag::C, (regA > 0xFF - value));
 						outValue = regA + value;
 					}
 					uint8_t carryIns = regA ^ value ^ outValue;
-					((carryIns >> 4) & 1) ? setFlag(Flag::H) : clearFlag(Flag::H);
+					setFlag(Flag::H, ((carryIns >> 4) & 1));
 					setRegister(Register::A, outValue);
 					clearFlag(Flag::N);
 				}
