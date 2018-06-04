@@ -55,9 +55,10 @@ namespace gb_emu
 	private:
 		ExecuteResult run();
 
-		uint16_t SP;
-		uint16_t PC;
+		uint16_t SP = 0xFFFF;
+		uint16_t PC = 0;
 
+		// Union for handling 8 bit registers and addressing them as pairs
 		union {
 			// Last two registers are fake registers such that
 			// getRegister[HL_UNUSED_UPPER/LOWER] does not corrupt memory
@@ -69,6 +70,17 @@ namespace gb_emu
 		
 		// 16 bytes of memory
 		uint8_t memory[0xFFFF];
+
+		/**
+		 * Gets the byte referenced by the opcode register. This could be (HL) which
+		 * is actually a memory access (where HL stores the pointer)
+		 */
+		uint8_t readValue(Opcode_Register r) const;
+		/**
+		 * Writes the byte to the target specified. Usually a register, unless
+		 * r = (HL), in which case it's a memory address (where HL stores the pointer)
+		 */
+		void writeValue(Opcode_Register r, uint8_t value);
 
 		uint8_t getRegister(Register r) const {
 			CHECK_REGISTER(r);
@@ -88,7 +100,6 @@ namespace gb_emu
 			registerPairs[toUType(r)] = value;
 		}
 
-
 		uint8_t getByte(uint8_t address) const {
 			return memory[0xFF00 + address];
 		}
@@ -103,6 +114,22 @@ namespace gb_emu
 
 		void setByte(uint16_t address, uint8_t value) {
 			memory[address] = value;
+		}
+
+		void setFlag(Flag f) {
+			registers[toUType(Register::F)] |= toUType(f);
+		}
+
+		void clearFlag(Flag f) {
+			registers[toUType(Register::F)] &= ~(toUType(f));
+		}
+
+		void toggleFlag(Flag f) {
+			registers[toUType(Register::F)] ^= toUType(f);
+		}
+
+		bool getFlag(Flag f) {
+			return (registers[toUType(Register::F)] & toUType(f)) != 0;
 		}
 	};
 }

@@ -36,6 +36,17 @@ namespace gb_emu
 		HL = 0x6,
 	};
 
+	enum class Opcode_Arithmetic_Command : uint8_t {
+		ADD = 0,
+		ADC = 1,
+		SUB = 2,
+		SBC = 3,
+		AND = 4,
+		XOR = 5,
+		OR = 6,
+		CP = 7,
+	};
+
 	/*struct LD_Op {
 		Opcode op;
 		Register r1, r2;
