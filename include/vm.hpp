@@ -151,7 +151,7 @@ namespace gb_emu
 			return (registers[toUType(Register::F)] & toUType(f)) != 0;
 		}
 
-		void ADC(uint8_t b);
-		void SBC(uint8_t b);
+		void ADC(Register r, uint8_t b);
+		void SBC(Register r, uint8_t b);
 	};
 }

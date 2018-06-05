@@ -31,16 +31,16 @@ namespace gb_emu
 				case Opcode_Misc1_Command_Groups::INC_r_2:
 				{
 					Opcode_Register r = static_cast<Opcode_Register>((instruction >> 3) | 0x07);
-					uint8_t value = readValue(r);
-					writeValue(r, ++value);
+					clearFlag(Flag::C);
+					ADC(getRegister_from_OpcodeRegister(r), 1);
 				}
 					break;
 				case Opcode_Misc1_Command_Groups::DEC_r_1:
 				case Opcode_Misc1_Command_Groups::DEC_r_2:
 				{
 					Opcode_Register r = static_cast<Opcode_Register>((instruction >> 3) | 0x07);
-					uint8_t value = readValue(r);
-					writeValue(r, --value);
+					clearFlag(Flag::C);
+					SBC(getRegister_from_OpcodeRegister(r), 1);
 				}
 					break;
 				case Opcode_Misc1_Command_Groups::LD_r1_d8_1:
@@ -107,19 +107,19 @@ namespace gb_emu
 				case Opcode_Arithmetic_Command::ADD:
 					// Perform an ADC with no carry bit
 					clearFlag(Flag::C);
-					ADC(value);
+					ADC(Register::A, value);
 					break;
 				case Opcode_Arithmetic_Command::ADC:
-					ADC(value);
+					ADC(Register::A, value);
 					break;
 				case Opcode_Arithmetic_Command::SUB:
 					// Perform an SBC with "no" carry bit (Since it is
 					// sub, we invert the meaning of carry and so set C)
 					clearFlag(Flag::C);
-					SBC(value);
+					SBC(Register::A, value);
 					break;
 				case Opcode_Arithmetic_Command::SBC:
-					SBC(value);
+					SBC(Register::A, value);
 					break;
 				case Opcode_Arithmetic_Command::AND:
 				{
@@ -150,7 +150,7 @@ namespace gb_emu
 					// CP is just a sub command, but with the result thrown away
 					// so we reset A to its original value
 					clearFlags();
-					SBC(value);
+					SBC(Register::A, value);
 					setRegister(Register::A, regA);
 					break;
 				}
@@ -203,31 +203,31 @@ namespace gb_emu
 	}
 
 
-	void VM::ADC(uint8_t b)
+	void VM::ADC(Register r, uint8_t b)
 	{
-		uint8_t regA = getRegister(Register::A);
+		uint8_t regValue = getRegister(r);
 		uint8_t outValue;
 		if(getFlag(Flag::C))
 		{
-			setFlag(Flag::C, (regA >= 0xFF - b));
-			outValue = regA + b + 1;
+			setFlag(Flag::C, (regValue >= 0xFF - b));
+			outValue = regValue + b + 1;
 		}
 		else
 		{
-			setFlag(Flag::C, (regA > 0xFF - b));
-			outValue = regA + b;
+			setFlag(Flag::C, (regValue > 0xFF - b));
+			outValue = regValue + b;
 		}
-		uint8_t carryIns = regA ^ b ^ outValue;
+		uint8_t carryIns = regValue ^ b ^ outValue;
 		setFlag(Flag::H, ((carryIns >> 4) & 1));
-		setRegister(Register::A, outValue);
+		setRegister(r, outValue);
 		clearFlag(Flag::N);
 		setFlag(Flag::Z, outValue == 0);
 	}
-	void VM::SBC(uint8_t b)
+	void VM::SBC(Register r, uint8_t b)
 	{
 		// a - b - c = a + ~b + 1 - c = a + ~b + !c
 		toggleFlag(Flag::C);
-		ADC(~b);
+		ADC(r, ~b);
 		toggleFlag(Flag::C);
 		setFlag(Flag::N);
 	}
