@@ -169,5 +169,7 @@ namespace gb_emu
 
 		uint8_t pop();
 		uint16_t pop_double();
+
+		void ret();
 	};
 }

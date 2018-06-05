@@ -406,6 +406,69 @@ namespace gb_emu
 					longJump(rst_address);
 					break;
 				default:
+				{
+					Opcode_Exact op = static_cast<Opcode_Exact>(instruction);
+					switch(op)
+					{
+					case Opcode_Exact::RET_NZ:
+						if(!getFlag(Flag::Z)) ret();
+						break;
+					case Opcode_Exact::RET_NC:
+						if(!getFlag(Flag::C)) ret();
+						break;
+					case Opcode_Exact::RET_Z:
+						if(getFlag(Flag::Z)) ret();
+						break;
+					case Opcode_Exact::RET_C:
+						if(getFlag(Flag::C)) ret();
+						break;
+					case Opcode_Exact::RET:
+						ret();
+						break;
+					case Opcode_Exact::RETI:
+						ret();
+						// todo: enable interrupts
+						break;
+					case Opcode_Exact::JP_NZ_nn:
+					{
+						uint16_t addr = getByte(PC++);
+						addr |= (getByte(PC++) << 8);
+						if(!getFlag(Flag::Z)) longJump(addr);
+					}
+					break;
+					case Opcode_Exact::JP_NC_nn:
+					{
+						uint16_t addr = getByte(PC++);
+						addr |= (getByte(PC++) << 8);
+						if(!getFlag(Flag::C)) longJump(addr);
+					}
+					break;
+					case Opcode_Exact::JP_Z_nn:
+					{
+						uint16_t addr = getByte(PC++);
+						addr |= (getByte(PC++) << 8);
+						if(getFlag(Flag::Z)) longJump(addr);
+					}
+					break;
+					case Opcode_Exact::JP_C_nn:
+					{
+						uint16_t addr = getByte(PC++);
+						addr |= (getByte(PC++) << 8);
+						if(getFlag(Flag::C)) longJump(addr);
+					}
+					break;
+					case Opcode_Exact::JP_nn:
+					{
+						uint16_t addr = getByte(PC++);
+						addr |= (getByte(PC++) << 8);
+						longJump(addr);
+					}
+					break;
+					case Opcode_Exact::JP_HL:
+						longJump(getRegister(RegisterPair::HL));
+						break;
+					}
+				}
 					break;
 				}
 			}
@@ -531,5 +594,9 @@ namespace gb_emu
 		uint16_t ret = (pop() << 8);
 		ret |= pop();
 		return ret;
+	}
+	void VM::ret()
+	{
+		PC = pop_double();
 	}
 }
