@@ -80,6 +80,15 @@ namespace gb_emu
 		MISC4 = 0xF,
 	};
 
+	enum class Opcode_Misc2_Command_Groups : uint8_t {
+		POP = 0x1,
+		PUSH = 0x5,
+		ARITH_1 = 0x6,
+		RST_1 = 0x7,
+		ARITH_2 = 0xE,
+		RST_2 = 0xF,
+	};
+
 	/*struct LD_Op {
 		Opcode op;
 		Register r1, r2;

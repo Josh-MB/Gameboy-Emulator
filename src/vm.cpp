@@ -8,7 +8,8 @@ namespace gb_emu
 
 		for(;;) {
 			uint8_t instruction = getByte(PC++);
-			switch(static_cast<Opcode_Group>(instruction) & Opcode_Group::MASK) {
+			switch(static_cast<Opcode_Group>(instruction) & Opcode_Group::MASK)
+			{
 			case Opcode_Group::MISC1:
 			{
 				Opcode_Misc1_Command_Groups cmd = static_cast<Opcode_Misc1_Command_Groups>(instruction | 0x0F);
@@ -322,6 +323,81 @@ namespace gb_emu
 			}
 				break;
 			case Opcode_Group::MISC2:
+			{
+				Opcode_Misc2_Command_Groups cmd = static_cast<Opcode_Misc2_Command_Groups>(instruction | 0x0F);
+				switch(cmd)
+				{
+				case Opcode_Misc2_Command_Groups::POP:
+					break;
+				case Opcode_Misc2_Command_Groups::PUSH:
+					break;
+				case Opcode_Misc2_Command_Groups::ARITH_1:
+				case Opcode_Misc2_Command_Groups::ARITH_2:
+				{
+					uint8_t value = getByte(PC++);
+					uint8_t regA = getRegister(Register::A);
+					Opcode_Arithmetic_Command arith_cmd = static_cast<Opcode_Arithmetic_Command>((instruction >> 3) | 0x07);
+					switch(arith_cmd)
+					{
+					case Opcode_Arithmetic_Command::ADD:
+						// Perform an ADC with no carry bit
+						clearFlag(Flag::C);
+						ADC(Register::A, value);
+						break;
+					case Opcode_Arithmetic_Command::ADC:
+						ADC(Register::A, value);
+						break;
+					case Opcode_Arithmetic_Command::SUB:
+						// Perform an SBC with "no" carry bit (Since it is
+						// sub, we invert the meaning of carry and so set C)
+						clearFlag(Flag::C);
+						SBC(Register::A, value);
+						break;
+					case Opcode_Arithmetic_Command::SBC:
+						SBC(Register::A, value);
+						break;
+					case Opcode_Arithmetic_Command::AND:
+					{
+						clearFlags();
+						uint8_t out = value & regA;
+						setRegister(Register::A, out);
+						setFlag(Flag::H);
+						setFlag(Flag::Z, out == 0);
+					}
+					break;
+					case Opcode_Arithmetic_Command::XOR:
+					{
+						clearFlags();
+						uint8_t out = value ^ regA;
+						setRegister(Register::A, out);
+						setFlag(Flag::Z, out == 0);
+					}
+					break;
+					case Opcode_Arithmetic_Command::OR:
+					{
+						clearFlags();
+						uint8_t out = value | regA;
+						setRegister(Register::A, out);
+						setFlag(Flag::Z, out == 0);
+					}
+					break;
+					case Opcode_Arithmetic_Command::CP:
+						// CP is just a sub command, but with the result thrown away
+						// so we reset A to its original value
+						clearFlags();
+						SBC(Register::A, value);
+						setRegister(Register::A, regA);
+						break;
+					}
+				}
+					break;
+				case Opcode_Misc2_Command_Groups::RST_1:
+				case Opcode_Misc2_Command_Groups::RST_2:
+					break;
+				default:
+					break;
+				}
+			}
 				break;
 			default:
 				return ExecuteResult::RUNTIME_ERROR;
