@@ -152,6 +152,10 @@ namespace gb_emu
 			return (registers[toUType(Register::F)] & toUType(f)) != 0;
 		}
 
+		void shortJump(uint8_t offset) {
+			PC += offset;
+		}
+
 		void ADC(Register r, uint8_t b);
 		void SBC(Register r, uint8_t b);
 	};

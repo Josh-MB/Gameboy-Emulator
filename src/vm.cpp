@@ -15,6 +15,34 @@ namespace gb_emu
 				switch(cmd)
 				{
 				case Opcode_Misc1_Command_Groups::MISC1:
+				{
+					Opcode_Exact op = static_cast<Opcode_Exact>(instruction);
+					switch(op)
+					{
+					case Opcode_Exact::NOP:
+						// Do Noop for 4 cycles
+						break;
+					case Opcode_Exact::STOP:
+						// Halt CPU and LCD until button press (interrupt?)
+						break;
+					case Opcode_Exact::JR_NZ_n:
+					{
+						uint8_t offset = getByte(PC++);
+						if(!getFlag(Flag::Z)) {
+							shortJump(offset);
+						}
+					}
+					break;
+					case Opcode_Exact::JR_NC_n:
+					{
+						uint8_t offset = getByte(PC++);
+						if(!getFlag(Flag::C)) {
+							shortJump(offset);
+						}
+					}
+					break;
+					}
+				}
 					break;
 				case Opcode_Misc1_Command_Groups::LD_r1_d16:
 				{
@@ -70,6 +98,43 @@ namespace gb_emu
 				case Opcode_Misc1_Command_Groups::MISC2:
 					break;
 				case Opcode_Misc1_Command_Groups::MISC3:
+				{
+					Opcode_Exact op = static_cast<Opcode_Exact>(instruction);
+					switch(op)
+					{
+					case Opcode_Exact::LD_nn_SP:
+					{
+						uint8_t addrHigh = getByte(PC++);
+						uint8_t addrLow = getByte(PC++);
+						uint16_t addr = (addrHigh << 8) | addrLow;
+						setByte(addr, SP >> 8);
+						setByte(++addr, static_cast<uint8_t>(SP & 0xFF));
+					}
+						break;
+					case Opcode_Exact::JR_n:
+					{
+						uint8_t offset = getByte(PC++);
+						shortJump(offset);
+					}
+						break;
+					case Opcode_Exact::JR_Z_n:
+					{
+						uint8_t offset = getByte(PC++);
+						if(getFlag(Flag::Z)) {
+							shortJump(offset);
+						}
+					}
+					break;
+					case Opcode_Exact::JR_C_n:
+					{
+						uint8_t offset = getByte(PC++);
+						if(getFlag(Flag::C)) {
+							shortJump(offset);
+						}
+					}
+					break;
+					}
+				}
 					break;
 				case Opcode_Misc1_Command_Groups::ADD_HL_rr1:
 				{
@@ -112,7 +177,7 @@ namespace gb_emu
 			case Opcode_Group::LD:
 			{
 				if(static_cast<Opcode>(instruction) == Opcode::HALT) {
-					// Halt
+					// Halt. Power down CPU until interrupt occurs
 				}
 				else {
 					Opcode_Register r1 = static_cast<Opcode_Register>((instruction >> 3) | 0x07);
