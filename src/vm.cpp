@@ -96,6 +96,42 @@ namespace gb_emu
 				}
 					break;
 				case Opcode_Misc1_Command_Groups::MISC2:
+				{
+					Opcode_Exact op = static_cast<Opcode_Exact>(instruction);
+					switch(op)
+					{
+					case Opcode_Exact::RLCA:
+					{
+						clearFlags();
+						uint8_t regA = getRegister(Register::A);
+						setFlag(Flag::C, regA & 0x80);
+						regA <<= 1;
+						setFlag(Flag::Z, regA == 0);
+						setRegister(Register::A, regA);
+					}
+					break;
+					case Opcode_Exact::RLA:
+					{
+						bool hadCarry = getFlag(Flag::C);
+						clearFlags();
+						uint8_t regA = getRegister(Register::A);
+						setFlag(Flag::C, regA & 0x80);
+						regA <<= 1;
+						if(hadCarry) {
+							regA |= 0x1;
+						}
+						setFlag(Flag::Z, regA == 0);
+						setRegister(Register::A, regA);
+					}
+					break;
+					case Opcode_Exact::DAA:
+						DAA();
+					break;
+					case Opcode_Exact::SCF:
+						setFlag(Flag::C);
+					break;
+					}
+				}
 					break;
 				case Opcode_Misc1_Command_Groups::MISC3:
 				{
@@ -170,6 +206,42 @@ namespace gb_emu
 				}
 					break;
 				case Opcode_Misc1_Command_Groups::MISC4:
+				{
+					Opcode_Exact op = static_cast<Opcode_Exact>(instruction);
+					switch(op)
+					{
+					case Opcode_Exact::RRCA:
+					{
+						clearFlags();
+						uint8_t regA = getRegister(Register::A);
+						setFlag(Flag::C, regA & 0x1);
+						regA >>= 1;
+						setFlag(Flag::Z, regA == 0);
+						setRegister(Register::A, regA);
+					}
+					break;
+					case Opcode_Exact::RRA:
+					{
+						bool hadCarry = getFlag(Flag::C);
+						clearFlags();
+						uint8_t regA = getRegister(Register::A);
+						setFlag(Flag::C, regA & 0x1);
+						regA >>= 1;
+						if(hadCarry) {
+							regA |= 0x80;
+						}
+						setFlag(Flag::Z, regA == 0);
+						setRegister(Register::A, regA);
+					}
+					break;
+					case Opcode_Exact::CPL:
+						setRegister(Register::A, ~getRegister(Register::A));
+						break;
+					case Opcode_Exact::CCF:
+						toggleFlag(Flag::C);
+						break;
+					}
+				}
 					break;
 				}
 			}
@@ -330,5 +402,27 @@ namespace gb_emu
 		ADC(r, ~b);
 		toggleFlag(Flag::C);
 		setFlag(Flag::N);
+	}
+
+	/** 
+	 * Decimal adjust register A. Handles converting register A
+	 * to Binary Coded Decimal format. See http://www.z80.info/z80syntx.htm#DAA
+	 * and https://www.reddit.com/r/EmuDev/comments/4ycoix/a_guide_to_the_gameboys_halfcarry_flag/
+	 */
+	void VM::DAA()
+	{
+		uint8_t offset = 0;
+		uint8_t regA = getRegister(Register::A);
+		bool N = getFlag(Flag::N);
+		if(getFlag(Flag::H) || (!N && (regA & 0xF) > 9)) {
+			offset = 6;
+		}
+		if(getFlag(Flag::C) || (!N && regA > 0x99)) {
+			offset |= 0x60;
+			setFlag(Flag::C);
+		}
+		setRegister(Register::A, regA + (N ? -offset : offset));
+		setFlag(Flag::Z, getRegister(Register::A) == 0);
+		clearFlag(Flag::H);
 	}
 }

@@ -158,5 +158,6 @@ namespace gb_emu
 
 		void ADC(Register r, uint8_t b);
 		void SBC(Register r, uint8_t b);
+		void DAA();
 	};
 }
