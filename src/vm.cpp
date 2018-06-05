@@ -17,6 +17,12 @@ namespace gb_emu
 				case Opcode_Misc1_Command_Groups::MISC1:
 					break;
 				case Opcode_Misc1_Command_Groups::LD_r1_d16:
+				{
+					Opcode_Register_Pair reg = static_cast<Opcode_Register_Pair>((instruction >> 4) | 0x03);
+					uint8_t valueHigh = getByte(PC++);
+					uint8_t valueLow = getByte(PC++);
+					writeValue(reg, (valueHigh << 8) | valueLow);
+				}
 					break;
 				case Opcode_Misc1_Command_Groups::LD_add_A:
 				{
@@ -32,9 +38,9 @@ namespace gb_emu
 					break;
 				case Opcode_Misc1_Command_Groups::INC_rr:
 				{
-					Opcode_Register_Pair rr = static_cast<Opcode_Register_Pair>((instruction >> 4) | 0x03);
-					uint16_t value = readValue(rr);
-					writeValue(rr, ++value);
+					Opcode_Register_Pair reg = static_cast<Opcode_Register_Pair>((instruction >> 4) | 0x03);
+					uint16_t value = readValue(reg);
+					writeValue(reg, ++value);
 				}
 					break;
 				case Opcode_Misc1_Command_Groups::INC_r_1:
