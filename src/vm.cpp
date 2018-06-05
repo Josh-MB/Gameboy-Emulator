@@ -45,18 +45,46 @@ namespace gb_emu
 				case Opcode_Arithmetic_Command::SUB:
 					// Perform an SBC with "no" carry bit (Since it is
 					// sub, we invert the meaning of carry and so set C)
-					setFlag(Flag::C);
-					ADC(~value);
-					toggleFlag(Flag::C);
-					setFlag(Flag::N);
+					clearFlag(Flag::C);
+					SBC(value);
 					break;
 				case Opcode_Arithmetic_Command::SBC:
-					// a - b - c = a + ~b + 1 - c = a + ~b + !c
-					toggleFlag(Flag::C);
-					ADC(~value);
-					toggleFlag(Flag::C);
-					setFlag(Flag::N);
+					SBC(value);
 					break;
+				case Opcode_Arithmetic_Command::AND:
+				{
+					clearFlags();
+					uint8_t out = value & regA;
+					setRegister(Register::A, out);
+					setFlag(Flag::H);
+					setFlag(Flag::Z, out == 0);
+				}
+					break;
+				case Opcode_Arithmetic_Command::XOR:
+				{
+					clearFlags();
+					uint8_t out = value ^ regA;
+					setRegister(Register::A, out);
+					setFlag(Flag::Z, out == 0);
+				}
+				break;
+				case Opcode_Arithmetic_Command::OR:
+				{
+					clearFlags();
+					uint8_t out = value | regA;
+					setRegister(Register::A, out);
+					setFlag(Flag::Z, out == 0);
+				}
+				break;
+				case Opcode_Arithmetic_Command::CP:
+				{
+					// CP is just a sub command, but with the result thrown away
+					// so we reset A to its original value
+					clearFlags();
+					SBC(value);
+					setRegister(Register::A, regA);
+				}
+				break;
 				}
 			}
 				break;
@@ -105,5 +133,13 @@ namespace gb_emu
 		setFlag(Flag::H, ((carryIns >> 4) & 1));
 		setRegister(Register::A, outValue);
 		clearFlag(Flag::N);
+	}
+	void VM::SBC(uint8_t b)
+	{
+		// a - b - c = a + ~b + 1 - c = a + ~b + !c
+		toggleFlag(Flag::C);
+		ADC(~b);
+		toggleFlag(Flag::C);
+		setFlag(Flag::N);
 	}
 }

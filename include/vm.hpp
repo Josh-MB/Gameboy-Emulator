@@ -128,6 +128,10 @@ namespace gb_emu
 			registers[toUType(Register::F)] &= ~(toUType(f));
 		}
 
+		void clearFlags() {
+			registers[toUType(Register::F)] = 0;
+		}
+
 		void toggleFlag(Flag f) {
 			registers[toUType(Register::F)] ^= toUType(f);
 		}
@@ -137,5 +141,6 @@ namespace gb_emu
 		}
 
 		void ADC(uint8_t b);
+		void SBC(uint8_t b);
 	};
 }
