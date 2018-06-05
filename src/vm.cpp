@@ -401,6 +401,9 @@ namespace gb_emu
 					break;
 				case Opcode_Misc2_Command_Groups::RST_1:
 				case Opcode_Misc2_Command_Groups::RST_2:
+					uint8_t rst_address = (instruction >> 3) & 0xF;
+					push_double(PC);
+					longJump(rst_address);
 					break;
 				default:
 					break;

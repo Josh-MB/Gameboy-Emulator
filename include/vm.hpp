@@ -156,6 +156,10 @@ namespace gb_emu
 			PC += offset;
 		}
 
+		void longJump(uint16_t addr) {
+			PC = addr;
+		}
+
 		void ADC(Register r, uint8_t b);
 		void SBC(Register r, uint8_t b);
 		void DAA();
