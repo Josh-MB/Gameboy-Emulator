@@ -330,20 +330,13 @@ namespace gb_emu
 				case Opcode_Misc2_Command_Groups::POP:
 				{
 					Opcode_Register_Pair rr = static_cast<Opcode_Register_Pair>((instruction >> 4) | 0x03);
-					uint16_t value = getByte(SP++); // High byte
-					value <<= 8;
-					value |= getByte(SP++);
-					writeValue(rr, value);
+					writeValue(rr, pop_double());
 				}
 					break;
 				case Opcode_Misc2_Command_Groups::PUSH:
 				{
 					Opcode_Register_Pair rr = static_cast<Opcode_Register_Pair>((instruction >> 4) | 0x03);
-					uint16_t value = readValue(rr);
-					uint8_t highByte = value >> 8;
-					uint8_t lowByte = value & 0xFF;
-					setByte(--SP, lowByte);
-					setByte(--SP, highByte);
+					push_double(readValue(rr));
 				}
 					break;
 				case Opcode_Misc2_Command_Groups::ARITH_1:
@@ -515,5 +508,25 @@ namespace gb_emu
 		setRegister(Register::A, regA + (N ? -offset : offset));
 		setFlag(Flag::Z, getRegister(Register::A) == 0);
 		clearFlag(Flag::H);
+	}
+
+	void VM::push(uint8_t value)
+	{
+		setByte(--SP, value);
+	}
+	void VM::push_double(uint16_t value)
+	{
+		push(value & 0xFF); // Low byte
+		push(value >> 8); // High byte
+	}
+	uint8_t VM::pop()
+	{
+		return getByte(SP++);
+	}
+	uint16_t VM::pop_double()
+	{
+		uint16_t ret = (pop() << 8);
+		ret |= pop();
+		return ret;
 	}
 }
