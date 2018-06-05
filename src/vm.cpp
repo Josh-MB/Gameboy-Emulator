@@ -35,38 +35,28 @@ namespace gb_emu
 				switch(cmd)
 				{
 				case Opcode_Arithmetic_Command::ADD:
-				{
-					setRegister(Register::A, regA + value);
-					setFlag(Flag::Z, (regA + value == 0));
-					uint16_t bigRegA = regA, bigValue = value;
-					regA &= 0x0F;
-					value &= 0x0F;
-					setFlag(Flag::H, (regA + value > 0x0F));
-					setFlag(Flag::C, (bigRegA + bigValue > 0xF0));
-					clearFlag(Flag::N);
-				}
+					// Perform an ADC with no carry bit
+					clearFlag(Flag::C);
+					ADC(value);
 					break;
 				case Opcode_Arithmetic_Command::ADC:
-				{
-					// May need to upgrade this to a uint16_t to prevent C++
-					// unsigned modulo behaviour
-					uint8_t outValue;
-					if(getFlag(Flag::C))
-					{
-						setFlag(Flag::C, (regA >= 0xFF - value));
-						outValue = regA + value + 1;
-					}
-					else
-					{
-						setFlag(Flag::C, (regA > 0xFF - value));
-						outValue = regA + value;
-					}
-					uint8_t carryIns = regA ^ value ^ outValue;
-					setFlag(Flag::H, ((carryIns >> 4) & 1));
-					setRegister(Register::A, outValue);
-					clearFlag(Flag::N);
-				}
-				break;
+					ADC(value);
+					break;
+				case Opcode_Arithmetic_Command::SUB:
+					// Perform an SBC with "no" carry bit (Since it is
+					// sub, we invert the meaning of carry and so set C)
+					setFlag(Flag::C);
+					ADC(~value);
+					toggleFlag(Flag::C);
+					setFlag(Flag::N);
+					break;
+				case Opcode_Arithmetic_Command::SBC:
+					// a - b - c = a + ~b + 1 - c = a + ~b + !c
+					toggleFlag(Flag::C);
+					ADC(~value);
+					toggleFlag(Flag::C);
+					setFlag(Flag::N);
+					break;
 				}
 			}
 				break;
@@ -96,5 +86,24 @@ namespace gb_emu
 		else {
 			setRegister(getRegister_from_OpcodeRegister(r), value);
 		}
+	}
+	void VM::ADC(uint8_t b)
+	{
+		uint8_t regA = getRegister(Register::A);
+		uint8_t outValue;
+		if(getFlag(Flag::C))
+		{
+			setFlag(Flag::C, (regA >= 0xFF - b));
+			outValue = regA + b + 1;
+		}
+		else
+		{
+			setFlag(Flag::C, (regA > 0xFF - b));
+			outValue = regA + b;
+		}
+		uint8_t carryIns = regA ^ b ^ outValue;
+		setFlag(Flag::H, ((carryIns >> 4) & 1));
+		setRegister(Register::A, outValue);
+		clearFlag(Flag::N);
 	}
 }

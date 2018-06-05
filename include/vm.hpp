@@ -135,5 +135,7 @@ namespace gb_emu
 		bool getFlag(Flag f) {
 			return (registers[toUType(Register::F)] & toUType(f)) != 0;
 		}
+
+		void ADC(uint8_t b);
 	};
 }
