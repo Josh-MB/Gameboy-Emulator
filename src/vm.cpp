@@ -467,6 +467,41 @@ namespace gb_emu
 					case Opcode_Exact::JP_HL:
 						longJump(getRegister(RegisterPair::HL));
 						break;
+					case Opcode_Exact::CALL_nn:
+					{
+						uint16_t addr = getByte(PC++);
+						addr |= (getByte(PC++) << 8);
+						call(addr);
+					}
+						break;
+					case Opcode_Exact::CALL_NZ_nn:
+					{
+						uint16_t addr = getByte(PC++);
+						addr |= (getByte(PC++) << 8);
+						if(!getFlag(Flag::Z)) call(addr);
+					}
+					break;
+					case Opcode_Exact::CALL_NC_nn:
+					{
+						uint16_t addr = getByte(PC++);
+						addr |= (getByte(PC++) << 8);
+						if(!getFlag(Flag::C)) call(addr);
+					}
+					break;
+					case Opcode_Exact::CALL_Z_nn:
+					{
+						uint16_t addr = getByte(PC++);
+						addr |= (getByte(PC++) << 8);
+						if(getFlag(Flag::Z)) call(addr);
+					}
+					break;
+					case Opcode_Exact::CALL_C_nn:
+					{
+						uint16_t addr = getByte(PC++);
+						addr |= (getByte(PC++) << 8);
+						if(getFlag(Flag::C)) call(addr);
+					}
+					break;
 					}
 				}
 					break;
@@ -598,5 +633,10 @@ namespace gb_emu
 	void VM::ret()
 	{
 		PC = pop_double();
+	}
+	void VM::call(uint16_t addr)
+	{
+		push_double(PC + 1);
+		longJump(addr);
 	}
 }

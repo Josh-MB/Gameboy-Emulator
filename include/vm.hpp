@@ -171,5 +171,6 @@ namespace gb_emu
 		uint16_t pop_double();
 
 		void ret();
+		void call(uint16_t addr);
 	};
 }
