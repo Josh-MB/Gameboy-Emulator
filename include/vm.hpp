@@ -25,6 +25,7 @@ namespace gb_emu
 		DE = 1,
 		HL = 2,
 		AF = 3,
+		UNUSED = 4,
 	};
 
 	constexpr Register getRegister_from_OpcodeRegister(Opcode_Register r) {
@@ -36,6 +37,14 @@ namespace gb_emu
 		}
 		else
 			return static_cast<Register>(r);
+	}
+
+	constexpr RegisterPair getRegisterPair_from_OpcodeRegisterPair(Opcode_Register_Pair r) {
+		if(r == Opcode_Register_Pair::SP) {
+			return RegisterPair::UNUSED;
+		}
+		else
+			return static_cast<RegisterPair>(r);
 	}
 
 	enum class Flag : uint8_t {
@@ -55,7 +64,7 @@ namespace gb_emu
 	private:
 		ExecuteResult run();
 
-		uint16_t SP = 0xFFFF;
+		uint16_t SP = 0xFFFE;
 		uint16_t PC = 0;
 
 		// Union for handling 8 bit registers and addressing them as pairs
@@ -76,11 +85,13 @@ namespace gb_emu
 		 * is actually a memory access (where HL stores the pointer)
 		 */
 		uint8_t readValue(Opcode_Register r) const;
+		uint16_t readValue(Opcode_Register_Pair r) const;
 		/**
 		 * Writes the byte to the target specified. Usually a register, unless
 		 * r = (HL), in which case it's a memory address (where HL stores the pointer)
 		 */
 		void writeValue(Opcode_Register r, uint8_t value);
+		void writeValue(Opcode_Register_Pair r, uint16_t value);
 
 		uint8_t getRegister(Register r) const {
 			CHECK_REGISTER(r);

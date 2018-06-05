@@ -41,6 +41,11 @@ namespace gb_emu
 		DE = 0x1,
 		HL = 0x2,
 		SP = 0x3,
+	};
+
+	enum class Opcode_Register_Pair_Address : uint8_t {
+		BC = 0x0,
+		DE = 0x1,
 		HL_plus = 0x2,
 		HL_minus = 0x3,
 	};

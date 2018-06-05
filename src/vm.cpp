@@ -21,6 +21,11 @@ namespace gb_emu
 				case Opcode_Misc1_Command_Groups::LD_add_A:
 					break;
 				case Opcode_Misc1_Command_Groups::INC_rr:
+				{
+					Opcode_Register_Pair rr = static_cast<Opcode_Register_Pair>((instruction >> 4) | 0x03);
+					uint16_t value = readValue(rr);
+					writeValue(rr, ++value);
+				}
 					break;
 				case Opcode_Misc1_Command_Groups::INC_r_1:
 				case Opcode_Misc1_Command_Groups::INC_r_2:
@@ -50,11 +55,26 @@ namespace gb_emu
 					break;
 				case Opcode_Misc1_Command_Groups::MISC3:
 					break;
-				case Opcode_Misc1_Command_Groups::ADD_rr1_rr2:
+				case Opcode_Misc1_Command_Groups::ADD_HL_rr1:
+				{
+					Opcode_Register_Pair rr = static_cast<Opcode_Register_Pair>((instruction >> 4) | 0x03);
+					uint16_t value = readValue(rr);
+					uint16_t HLvalue = getRegister(RegisterPair::HL);
+					setFlag(Flag::C, (HLvalue > 0xFFFF - value));
+					uint16_t outValue = HLvalue + value;
+					uint16_t carryIns = HLvalue ^ value ^ outValue;
+					setFlag(Flag::H, ((carryIns >> 12) & 1));
+					setRegister(RegisterPair::HL, outValue);
+					clearFlag(Flag::N);
+					setFlag(Flag::Z, outValue == 0);
+				}
 					break;
 				case Opcode_Misc1_Command_Groups::LD_A_add:
 					break;
 				case Opcode_Misc1_Command_Groups::DEC_rr:
+					Opcode_Register_Pair rr = static_cast<Opcode_Register_Pair>((instruction >> 4) | 0x03);
+					uint16_t value = readValue(rr);
+					writeValue(rr, --value);
 					break;
 				case Opcode_Misc1_Command_Groups::MISC4:
 					break;
@@ -154,6 +174,14 @@ namespace gb_emu
 			return getRegister(getRegister_from_OpcodeRegister(r));
 		}
 	}
+	uint16_t VM::readValue(Opcode_Register_Pair r) const
+	{
+		if(r == Opcode_Register_Pair::SP) {
+			return SP;
+		}
+		return getRegister(getRegisterPair_from_OpcodeRegisterPair(r));
+	}
+
 	void VM::writeValue(Opcode_Register r, uint8_t value)
 	{
 		if(r == Opcode_Register::HL) {
@@ -163,6 +191,18 @@ namespace gb_emu
 			setRegister(getRegister_from_OpcodeRegister(r), value);
 		}
 	}
+
+	void VM::writeValue(Opcode_Register_Pair r, uint16_t value)
+	{
+		if(r == Opcode_Register_Pair::SP) {
+			SP = value;
+		}
+		else {
+			setRegister(getRegisterPair_from_OpcodeRegisterPair(r), value);
+		}
+	}
+
+
 	void VM::ADC(uint8_t b)
 	{
 		uint8_t regA = getRegister(Register::A);
@@ -181,6 +221,7 @@ namespace gb_emu
 		setFlag(Flag::H, ((carryIns >> 4) & 1));
 		setRegister(Register::A, outValue);
 		clearFlag(Flag::N);
+		setFlag(Flag::Z, outValue == 0);
 	}
 	void VM::SBC(uint8_t b)
 	{
