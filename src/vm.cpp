@@ -328,8 +328,23 @@ namespace gb_emu
 				switch(cmd)
 				{
 				case Opcode_Misc2_Command_Groups::POP:
+				{
+					Opcode_Register_Pair rr = static_cast<Opcode_Register_Pair>((instruction >> 4) | 0x03);
+					uint16_t value = getByte(SP++); // High byte
+					value <<= 8;
+					value |= getByte(SP++);
+					writeValue(rr, value);
+				}
 					break;
 				case Opcode_Misc2_Command_Groups::PUSH:
+				{
+					Opcode_Register_Pair rr = static_cast<Opcode_Register_Pair>((instruction >> 4) | 0x03);
+					uint16_t value = readValue(rr);
+					uint8_t highByte = value >> 8;
+					uint8_t lowByte = value & 0xFF;
+					setByte(--SP, lowByte);
+					setByte(--SP, highByte);
+				}
 					break;
 				case Opcode_Misc2_Command_Groups::ARITH_1:
 				case Opcode_Misc2_Command_Groups::ARITH_2:
