@@ -71,7 +71,7 @@ namespace gb_emu
 		LD_r1_d8_1 = 0x6,
 		MISC2 = 0x7,
 		MISC3 = 0x8,
-		ADD_rr1_rr2 = 0x9,
+		ADD_HL_rr1 = 0x9,
 		LD_A_add = 0xA,
 		DEC_rr = 0xB,
 		INC_r_2 = 0xC,

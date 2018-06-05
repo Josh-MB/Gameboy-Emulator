@@ -86,6 +86,7 @@ namespace gb_emu
 		 */
 		uint8_t readValue(Opcode_Register r) const;
 		uint16_t readValue(Opcode_Register_Pair r) const;
+		uint16_t readValue(Opcode_Register_Pair_Address r) const;
 		/**
 		 * Writes the byte to the target specified. Usually a register, unless
 		 * r = (HL), in which case it's a memory address (where HL stores the pointer)

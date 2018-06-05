@@ -19,6 +19,16 @@ namespace gb_emu
 				case Opcode_Misc1_Command_Groups::LD_r1_d16:
 					break;
 				case Opcode_Misc1_Command_Groups::LD_add_A:
+				{
+					Opcode_Register_Pair_Address reg = static_cast<Opcode_Register_Pair_Address>((instruction >> 4) | 0x03);
+					uint8_t value = getRegister(Register::A);
+					uint16_t addr = readValue(reg);
+					if(reg == Opcode_Register_Pair_Address::HL_plus)
+						setRegister(RegisterPair::HL, getRegister(RegisterPair::HL) + 1);
+					else if(reg == Opcode_Register_Pair_Address::HL_minus)
+						setRegister(RegisterPair::HL, getRegister(RegisterPair::HL) - 1);
+					setByte(addr, value);
+				}
 					break;
 				case Opcode_Misc1_Command_Groups::INC_rr:
 				{
@@ -70,11 +80,23 @@ namespace gb_emu
 				}
 					break;
 				case Opcode_Misc1_Command_Groups::LD_A_add:
-					break;
+				{
+					Opcode_Register_Pair_Address reg = static_cast<Opcode_Register_Pair_Address>((instruction >> 4) | 0x03);
+					uint16_t addr = readValue(reg);
+					uint8_t value = getByte(addr);
+					if(reg == Opcode_Register_Pair_Address::HL_plus)
+						setRegister(RegisterPair::HL, getRegister(RegisterPair::HL) + 1);
+					else if(reg == Opcode_Register_Pair_Address::HL_minus)
+						setRegister(RegisterPair::HL, getRegister(RegisterPair::HL) - 1);
+					setRegister(Register::A, value);
+				}
+				break;
 				case Opcode_Misc1_Command_Groups::DEC_rr:
+				{
 					Opcode_Register_Pair rr = static_cast<Opcode_Register_Pair>((instruction >> 4) | 0x03);
 					uint16_t value = readValue(rr);
 					writeValue(rr, --value);
+				}
 					break;
 				case Opcode_Misc1_Command_Groups::MISC4:
 					break;
@@ -180,6 +202,13 @@ namespace gb_emu
 			return SP;
 		}
 		return getRegister(getRegisterPair_from_OpcodeRegisterPair(r));
+	}
+	uint16_t VM::readValue(Opcode_Register_Pair_Address r) const
+	{
+		if(r == Opcode_Register_Pair_Address::HL_plus || r == Opcode_Register_Pair_Address::HL_minus) {
+			return getRegister(RegisterPair::HL);
+		}
+		return getRegister(getRegisterPair_from_OpcodeRegisterPair(static_cast<Opcode_Register_Pair>(r)));
 	}
 
 	void VM::writeValue(Opcode_Register r, uint8_t value)
