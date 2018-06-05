@@ -36,6 +36,15 @@ namespace gb_emu
 		HL = 0x6,
 	};
 
+	enum class Opcode_Register_Pair : uint8_t {
+		BC = 0x0,
+		DE = 0x1,
+		HL = 0x2,
+		SP = 0x3,
+		HL_plus = 0x2,
+		HL_minus = 0x3,
+	};
+
 	enum class Opcode_Arithmetic_Command : uint8_t {
 		ADD = 0,
 		ADC = 1,
@@ -45,6 +54,25 @@ namespace gb_emu
 		XOR = 5,
 		OR = 6,
 		CP = 7,
+	};
+
+	enum class Opcode_Misc1_Command_Groups : uint8_t {
+		MISC1 = 0x0,
+		LD_r1_d16 = 0x1,
+		LD_add_A = 0x2,
+		INC_rr = 0x3,
+		INC_r_1 = 0x4,
+		DEC_r_1 = 0x5,
+		LD_r1_d8_1 = 0x6,
+		MISC2 = 0x7,
+		MISC3 = 0x8,
+		ADD_rr1_rr2 = 0x9,
+		LD_A_add = 0xA,
+		DEC_rr = 0xB,
+		INC_r_2 = 0xC,
+		DEC_r_2 = 0xD,
+		LD_r1_d8_2 = 0xE,
+		MISC4 = 0xF,
 	};
 
 	/*struct LD_Op {

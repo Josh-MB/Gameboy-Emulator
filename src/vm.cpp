@@ -10,6 +10,56 @@ namespace gb_emu
 			uint8_t instruction = getByte(PC++);
 			switch(static_cast<Opcode_Group>(instruction) & Opcode_Group::MASK) {
 			case Opcode_Group::MISC1:
+			{
+				Opcode_Misc1_Command_Groups cmd = static_cast<Opcode_Misc1_Command_Groups>(instruction | 0x0F);
+				switch(cmd)
+				{
+				case Opcode_Misc1_Command_Groups::MISC1:
+					break;
+				case Opcode_Misc1_Command_Groups::LD_r1_d16:
+					break;
+				case Opcode_Misc1_Command_Groups::LD_add_A:
+					break;
+				case Opcode_Misc1_Command_Groups::INC_rr:
+					break;
+				case Opcode_Misc1_Command_Groups::INC_r_1:
+				case Opcode_Misc1_Command_Groups::INC_r_2:
+				{
+					Opcode_Register r = static_cast<Opcode_Register>((instruction >> 3) | 0x07);
+					uint8_t value = readValue(r);
+					writeValue(r, ++value);
+				}
+					break;
+				case Opcode_Misc1_Command_Groups::DEC_r_1:
+				case Opcode_Misc1_Command_Groups::DEC_r_2:
+				{
+					Opcode_Register r = static_cast<Opcode_Register>((instruction >> 3) | 0x07);
+					uint8_t value = readValue(r);
+					writeValue(r, --value);
+				}
+					break;
+				case Opcode_Misc1_Command_Groups::LD_r1_d8_1:
+				case Opcode_Misc1_Command_Groups::LD_r1_d8_2:
+				{
+					Opcode_Register r = static_cast<Opcode_Register>((instruction >> 3) | 0x07);
+					uint8_t value = getByte(PC++);
+					writeValue(r, value);
+				}
+					break;
+				case Opcode_Misc1_Command_Groups::MISC2:
+					break;
+				case Opcode_Misc1_Command_Groups::MISC3:
+					break;
+				case Opcode_Misc1_Command_Groups::ADD_rr1_rr2:
+					break;
+				case Opcode_Misc1_Command_Groups::LD_A_add:
+					break;
+				case Opcode_Misc1_Command_Groups::DEC_rr:
+					break;
+				case Opcode_Misc1_Command_Groups::MISC4:
+					break;
+				}
+			}
 				break;
 			case Opcode_Group::LD:
 			{
@@ -77,14 +127,12 @@ namespace gb_emu
 				}
 				break;
 				case Opcode_Arithmetic_Command::CP:
-				{
 					// CP is just a sub command, but with the result thrown away
 					// so we reset A to its original value
 					clearFlags();
 					SBC(value);
 					setRegister(Register::A, regA);
-				}
-				break;
+					break;
 				}
 			}
 				break;
