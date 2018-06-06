@@ -107,6 +107,9 @@ namespace gb_emu
 						uint8_t regA = getRegister(Register::A);
 						setFlag(Flag::C, regA & 0x80);
 						regA <<= 1;
+						if(getFlag(Flag::C)) {
+							regA |= 0x1;
+						}
 						setFlag(Flag::Z, regA == 0);
 						setRegister(Register::A, regA);
 					}
@@ -217,6 +220,9 @@ namespace gb_emu
 						uint8_t regA = getRegister(Register::A);
 						setFlag(Flag::C, regA & 0x1);
 						regA >>= 1;
+						if(getFlag(Flag::C)) {
+							regA |= 0x80;
+						}
 						setFlag(Flag::Z, regA == 0);
 						setRegister(Register::A, regA);
 					}
@@ -709,5 +715,6 @@ namespace gb_emu
 	}
 	void VM::doPrefixCBCommand()
 	{
+
 	}
 }
