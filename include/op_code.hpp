@@ -101,6 +101,18 @@ namespace gb_emu
 		return static_cast<Opcode_Prefix_Group>(static_cast<uint8_t>(lhs) & static_cast<uint8_t>(rhs));
 	}
 
+	enum class Opcode_Prefix_Misc1_Command_Groups : uint8_t {
+		ROTATE = 0x0,
+		ROTATE_THRU_CARRY = 0x10,
+		SHIFT = 0x20,
+		SWAP_SHIFT = 0x30,
+		MASK = 0xF0,
+	};
+
+	constexpr Opcode_Prefix_Misc1_Command_Groups operator & (Opcode_Prefix_Misc1_Command_Groups lhs, Opcode_Prefix_Misc1_Command_Groups rhs) {
+		return static_cast<Opcode_Prefix_Misc1_Command_Groups>(static_cast<uint8_t>(lhs) & static_cast<uint8_t>(rhs));
+	}
+
 	/*struct LD_Op {
 		Opcode op;
 		Register r1, r2;

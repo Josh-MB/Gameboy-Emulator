@@ -720,6 +720,53 @@ namespace gb_emu
 		switch(static_cast<Opcode_Prefix_Group>(instruction) & Opcode_Prefix_Group::MASK)
 		{
 		case Opcode_Prefix_Group::MISC1:
+		{
+			bool bit3 = instruction & 0x08;
+			switch(static_cast<Opcode_Prefix_Misc1_Command_Groups>(instruction) & Opcode_Prefix_Misc1_Command_Groups::MASK)
+			{
+			case Opcode_Prefix_Misc1_Command_Groups::ROTATE:
+			{
+				clearFlags();
+				uint8_t carryMask = bit3 ? 0x1 : 0x80;
+				uint8_t rotateInMask = bit3 ? 0x80 : 0x1;
+				uint8_t regA = getRegister(Register::A);
+				setFlag(Flag::C, regA & carryMask);
+				if(bit3)
+					regA >>= 1;
+				else
+					regA <<= 1;
+				if(getFlag(Flag::C)) {
+					regA |= rotateInMask;
+				}
+				setFlag(Flag::Z, regA == 0);
+				setRegister(Register::A, regA);
+			}
+				break;
+			case Opcode_Prefix_Misc1_Command_Groups::ROTATE_THRU_CARRY:
+			{
+				bool hadCarry = getFlag(Flag::C);
+				clearFlags();
+				uint8_t carryMask = bit3 ? 0x1 : 0x80;
+				uint8_t rotateInMask = bit3 ? 0x80 : 0x1;
+				uint8_t regA = getRegister(Register::A);
+				setFlag(Flag::C, regA & carryMask);
+				if(bit3)
+					regA >>= 1;
+				else
+					regA <<= 1;
+				if(hadCarry) {
+					regA |= rotateInMask;
+				}
+				setFlag(Flag::Z, regA == 0);
+				setRegister(Register::A, regA);
+			}
+				break;
+			case Opcode_Prefix_Misc1_Command_Groups::SHIFT:
+				break;
+			case Opcode_Prefix_Misc1_Command_Groups::SWAP_SHIFT: // Swap/Shift Right, clear MSB
+				break;
+			}
+		}
 			break;
 		case Opcode_Prefix_Group::TEST_BIT:
 		{
