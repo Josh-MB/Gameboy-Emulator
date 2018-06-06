@@ -81,6 +81,22 @@ namespace gb_emu
 		uint8_t memory[0xFFFF];
 
 		/**
+		 * Fetches the next byte and increments the program counter
+		 */
+		uint8_t fetchByte() {
+			return getByte(PC++);
+		}
+
+		/**
+		 * Fetches the next double byte, and increments program counter
+		 * twice. Assumes LSB stored first.
+		 */
+		uint16_t fetchDouble() {
+			uint16_t ret = getByte(PC++);
+			ret |= (getByte(PC++) << 8);
+			return ret;
+		}
+		/**
 		 * Gets the byte referenced by the opcode register. This could be (HL) which
 		 * is actually a memory access (where HL stores the pointer)
 		 */
@@ -128,6 +144,11 @@ namespace gb_emu
 			memory[address] = value;
 		}
 
+		void setDouble(uint16_t address, uint16_t value) {
+			memory[address] = static_cast<uint8_t>(value & 0xFF);
+			memory[address + 1] = static_cast<uint8_t>(value >> 8);
+		}
+
 		void setFlag(Flag f, bool state) {
 			registers[toUType(Register::F)] |= (state * toUType(f));
 		}
@@ -148,7 +169,7 @@ namespace gb_emu
 			registers[toUType(Register::F)] ^= toUType(f);
 		}
 
-		bool getFlag(Flag f) {
+		bool getFlag(Flag f) const {
 			return (registers[toUType(Register::F)] & toUType(f)) != 0;
 		}
 

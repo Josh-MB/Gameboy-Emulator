@@ -7,7 +7,7 @@ namespace gb_emu
 	{
 
 		for(;;) {
-			uint8_t instruction = getByte(PC++);
+			uint8_t instruction = fetchByte();
 			switch(static_cast<Opcode_Group>(instruction) & Opcode_Group::MASK)
 			{
 			case Opcode_Group::MISC1:
@@ -28,7 +28,7 @@ namespace gb_emu
 						break;
 					case Opcode_Exact::JR_NZ_n:
 					{
-						uint8_t offset = getByte(PC++);
+						uint8_t offset = fetchByte();
 						if(!getFlag(Flag::Z)) {
 							shortJump(offset);
 						}
@@ -36,7 +36,7 @@ namespace gb_emu
 					break;
 					case Opcode_Exact::JR_NC_n:
 					{
-						uint8_t offset = getByte(PC++);
+						uint8_t offset = fetchByte();
 						if(!getFlag(Flag::C)) {
 							shortJump(offset);
 						}
@@ -48,9 +48,7 @@ namespace gb_emu
 				case Opcode_Misc1_Command_Groups::LD_r1_d16:
 				{
 					Opcode_Register_Pair reg = static_cast<Opcode_Register_Pair>((instruction >> 4) | 0x03);
-					uint8_t valueHigh = getByte(PC++);
-					uint8_t valueLow = getByte(PC++);
-					writeValue(reg, (valueHigh << 8) | valueLow);
+					writeValue(reg, fetchDouble());
 				}
 					break;
 				case Opcode_Misc1_Command_Groups::LD_add_A:
@@ -92,7 +90,7 @@ namespace gb_emu
 				case Opcode_Misc1_Command_Groups::LD_r1_d8_2:
 				{
 					Opcode_Register r = static_cast<Opcode_Register>((instruction >> 3) | 0x07);
-					uint8_t value = getByte(PC++);
+					uint8_t value = fetchByte();
 					writeValue(r, value);
 				}
 					break;
@@ -143,23 +141,14 @@ namespace gb_emu
 					switch(op)
 					{
 					case Opcode_Exact::LD_nn_SP:
-					{
-						uint8_t addrHigh = getByte(PC++);
-						uint8_t addrLow = getByte(PC++);
-						uint16_t addr = (addrHigh << 8) | addrLow;
-						setByte(addr, SP >> 8);
-						setByte(++addr, static_cast<uint8_t>(SP & 0xFF));
-					}
+						setDouble(fetchDouble(), SP);
 						break;
 					case Opcode_Exact::JR_n:
-					{
-						uint8_t offset = getByte(PC++);
-						shortJump(offset);
-					}
+						shortJump(fetchByte());
 						break;
 					case Opcode_Exact::JR_Z_n:
 					{
-						uint8_t offset = getByte(PC++);
+						uint8_t offset = fetchByte();
 						if(getFlag(Flag::Z)) {
 							shortJump(offset);
 						}
@@ -167,7 +156,7 @@ namespace gb_emu
 					break;
 					case Opcode_Exact::JR_C_n:
 					{
-						uint8_t offset = getByte(PC++);
+						uint8_t offset = fetchByte();
 						if(getFlag(Flag::C)) {
 							shortJump(offset);
 						}
@@ -348,7 +337,7 @@ namespace gb_emu
 				case Opcode_Misc2_Command_Groups::ARITH_1:
 				case Opcode_Misc2_Command_Groups::ARITH_2:
 				{
-					uint8_t value = getByte(PC++);
+					uint8_t value = fetchByte();
 					uint8_t regA = getRegister(Register::A);
 					Opcode_Arithmetic_Command arith_cmd = static_cast<Opcode_Arithmetic_Command>((instruction >> 3) | 0x07);
 					switch(arith_cmd)
@@ -439,82 +428,66 @@ namespace gb_emu
 						break;
 					case Opcode_Exact::JP_NZ_nn:
 					{
-						uint16_t addr = getByte(PC++);
-						addr |= (getByte(PC++) << 8);
+						uint16_t addr = fetchDouble();
 						if(!getFlag(Flag::Z)) longJump(addr);
 					}
 					break;
 					case Opcode_Exact::JP_NC_nn:
 					{
-						uint16_t addr = getByte(PC++);
-						addr |= (getByte(PC++) << 8);
+						uint16_t addr = fetchDouble();
 						if(!getFlag(Flag::C)) longJump(addr);
 					}
 					break;
 					case Opcode_Exact::JP_Z_nn:
 					{
-						uint16_t addr = getByte(PC++);
-						addr |= (getByte(PC++) << 8);
+						uint16_t addr = fetchDouble();
 						if(getFlag(Flag::Z)) longJump(addr);
 					}
 					break;
 					case Opcode_Exact::JP_C_nn:
 					{
-						uint16_t addr = getByte(PC++);
-						addr |= (getByte(PC++) << 8);
+						uint16_t addr = fetchDouble();
 						if(getFlag(Flag::C)) longJump(addr);
 					}
 					break;
 					case Opcode_Exact::JP_nn:
-					{
-						uint16_t addr = getByte(PC++);
-						addr |= (getByte(PC++) << 8);
-						longJump(addr);
-					}
-					break;
+						longJump(fetchDouble());
+						break;
 					case Opcode_Exact::JP_HL:
 						longJump(getRegister(RegisterPair::HL));
 						break;
 					case Opcode_Exact::CALL_nn:
-					{
-						uint16_t addr = getByte(PC++);
-						addr |= (getByte(PC++) << 8);
-						call(addr);
-					}
+						call(fetchDouble());
 						break;
 					case Opcode_Exact::CALL_NZ_nn:
 					{
-						uint16_t addr = getByte(PC++);
-						addr |= (getByte(PC++) << 8);
+						uint16_t addr = fetchDouble();
 						if(!getFlag(Flag::Z)) call(addr);
 					}
 					break;
 					case Opcode_Exact::CALL_NC_nn:
 					{
-						uint16_t addr = getByte(PC++);
-						addr |= (getByte(PC++) << 8);
+						uint16_t addr = fetchDouble();
 						if(!getFlag(Flag::C)) call(addr);
 					}
 					break;
 					case Opcode_Exact::CALL_Z_nn:
 					{
-						uint16_t addr = getByte(PC++);
-						addr |= (getByte(PC++) << 8);
+						uint16_t addr = fetchDouble();
 						if(getFlag(Flag::Z)) call(addr);
 					}
 					break;
 					case Opcode_Exact::CALL_C_nn:
 					{
-						uint16_t addr = getByte(PC++);
-						addr |= (getByte(PC++) << 8);
+						uint16_t addr = fetchDouble();
 						if(getFlag(Flag::C)) call(addr);
 					}
 					break;
 					case Opcode_Exact::LDH_n_A:
-						setByte(getByte(PC++), getRegister(Register::A));
+						setByte(fetchByte(), getRegister(Register::A));
 					break;
 					case Opcode_Exact::LDH_A_n:
-						setRegister(Register::A, getByte(getByte(PC++)));
+						setRegister(Register::A, getByte(fetchByte()));
 						break;
 					case Opcode_Exact::LD_offsetC_A:
 						setByte(getRegister(Register::C), getRegister(Register::A));
@@ -523,26 +496,18 @@ namespace gb_emu
 						setRegister(Register::A, getByte(getRegister(Register::C)));
 						break;
 					case Opcode_Exact::LD_nn_A:
-					{
-						uint16_t addr = getByte(PC++);
-						addr |= (getByte(PC++) << 8);
-						setRegister(Register::A, getByte(addr));
-					}
-					break;
+						setByte(fetchDouble(), getRegister(Register::A));
+						break;
 					case Opcode_Exact::LD_A_nn:
-					{
-						uint16_t addr = getByte(PC++);
-						addr |= (getByte(PC++) << 8);
-						setByte(addr, getRegister(Register::A));
-					}
-					break;
+						setRegister(Register::A, getByte(fetchDouble()));
+						break;
 					case Opcode_Exact::LD_SP_HL:
 						SP = getRegister(RegisterPair::HL);
 						break;
 					case Opcode_Exact::LDHL_SP_n:
 					{
 						clearFlags();
-						uint8_t offset = getByte(PC++);
+						uint8_t offset = fetchByte();
 						uint16_t addr = SP + offset;
 						setRegister(RegisterPair::HL, addr);
 						uint16_t carry = addr ^ SP ^ offset;
@@ -553,7 +518,7 @@ namespace gb_emu
 					case Opcode_Exact::ADD_SP_n:
 					{
 						clearFlags();
-						uint8_t offset = getByte(PC++);
+						uint8_t offset = fetchByte();
 						uint16_t newSP = SP + offset;
 						uint16_t carry = newSP ^ SP ^ offset;
 						setFlag(Flag::H, carry & 0x10);
@@ -715,7 +680,7 @@ namespace gb_emu
 	}
 	void VM::doPrefixCBCommand()
 	{
-		uint8_t instruction = getByte(PC++);
+		uint8_t instruction = fetchByte();
 		Opcode_Register reg = static_cast<Opcode_Register>(instruction & 0x3);
 		switch(static_cast<Opcode_Prefix_Group>(instruction) & Opcode_Prefix_Group::MASK)
 		{
