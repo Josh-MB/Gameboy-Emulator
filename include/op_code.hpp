@@ -89,6 +89,18 @@ namespace gb_emu
 		RST_2 = 0xF,
 	};
 
+	enum class Opcode_Prefix_Group : uint8_t {
+		MISC1 = 0x00,
+		TEST_BIT = 0x40,
+		CLEAR_BIT = 0x80,
+		SET_BIT = 0xC0,
+		MASK = 0xC0,
+	};
+
+	constexpr Opcode_Prefix_Group operator & (Opcode_Prefix_Group lhs, Opcode_Prefix_Group rhs) {
+		return static_cast<Opcode_Prefix_Group>(static_cast<uint8_t>(lhs) & static_cast<uint8_t>(rhs));
+	}
+
 	/*struct LD_Op {
 		Opcode op;
 		Register r1, r2;

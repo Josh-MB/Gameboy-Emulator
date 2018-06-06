@@ -715,6 +715,32 @@ namespace gb_emu
 	}
 	void VM::doPrefixCBCommand()
 	{
-
+		uint8_t instruction = getByte(PC++);
+		Register reg = static_cast<Register>(instruction & 0x3);
+		switch(static_cast<Opcode_Prefix_Group>(instruction) & Opcode_Prefix_Group::MASK)
+		{
+		case Opcode_Prefix_Group::MISC1:
+			break;
+		case Opcode_Prefix_Group::TEST_BIT:
+		{
+			uint8_t bit = (instruction >> 3) & 0x3;
+			setFlag(Flag::Z, getRegister(reg) & (1 << bit));
+			setFlag(Flag::H);
+			clearFlag(Flag::N);
+		}
+			break;
+		case Opcode_Prefix_Group::CLEAR_BIT:
+		{
+			uint8_t bit = (instruction >> 3) & 0x3;
+			setRegister(reg, getRegister(reg) & ~(1 << bit));
+		}
+			break;
+		case Opcode_Prefix_Group::SET_BIT:
+		{
+			uint8_t bit = (instruction >> 3) & 0x3;
+			setRegister(reg, getRegister(reg) & (1 << bit));
+		}
+			break;
+		}
 	}
 }
