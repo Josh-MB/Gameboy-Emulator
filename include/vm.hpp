@@ -215,5 +215,7 @@ namespace gb_emu
 
 		uint8_t addAndCalcCarry(uint8_t a, uint8_t b);
 		uint16_t addAndCalcCarry(uint16_t a, uint16_t b);
+
+		void rotate(Opcode_Register r, bool right, bool throughCarry);
 	};
 }
