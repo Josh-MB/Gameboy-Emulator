@@ -170,14 +170,14 @@ namespace gb_emu
 					uint8_t value = readValue(r2);
 					writeValue(r1, value);
 				}
-			}
 				break;
+			}
 			case Opcode_Group::ARITH:
 			{
 				Opcode_Register reg = decodeRegister(instruction, true);
 				doArithmeticCommand(static_cast<Opcode_Arithmetic_Command>((instruction >> 3) | 0x07), readValue(reg));
-			}
 				break;
+			}
 			case Opcode_Group::MISC2:
 			{
 				Opcode_Misc2_Command_Groups cmd = static_cast<Opcode_Misc2_Command_Groups>(instruction | 0x0F);
@@ -226,26 +226,26 @@ namespace gb_emu
 					{
 						uint16_t addr = fetchDouble();
 						if(!getFlag(Flag::Z)) longJump(addr);
+						break;
 					}
-					break;
 					case Opcode_Exact::JP_NC_nn:
 					{
 						uint16_t addr = fetchDouble();
 						if(!getFlag(Flag::C)) longJump(addr);
+						break;
 					}
-					break;
 					case Opcode_Exact::JP_Z_nn:
 					{
 						uint16_t addr = fetchDouble();
 						if(getFlag(Flag::Z)) longJump(addr);
+						break;
 					}
-					break;
 					case Opcode_Exact::JP_C_nn:
 					{
 						uint16_t addr = fetchDouble();
 						if(getFlag(Flag::C)) longJump(addr);
+						break;
 					}
-					break;
 					case Opcode_Exact::JP_nn:
 						longJump(fetchDouble());
 						break;
@@ -259,29 +259,29 @@ namespace gb_emu
 					{
 						uint16_t addr = fetchDouble();
 						if(!getFlag(Flag::Z)) call(addr);
+						break;
 					}
-					break;
 					case Opcode_Exact::CALL_NC_nn:
 					{
 						uint16_t addr = fetchDouble();
 						if(!getFlag(Flag::C)) call(addr);
+						break;
 					}
-					break;
 					case Opcode_Exact::CALL_Z_nn:
 					{
 						uint16_t addr = fetchDouble();
 						if(getFlag(Flag::Z)) call(addr);
+						break;
 					}
-					break;
 					case Opcode_Exact::CALL_C_nn:
 					{
 						uint16_t addr = fetchDouble();
 						if(getFlag(Flag::C)) call(addr);
+						break;
 					}
-					break;
 					case Opcode_Exact::LDH_n_A:
 						setByte(fetchByte(), getRegister(Register::A));
-					break;
+						break;
 					case Opcode_Exact::LDH_A_n:
 						setRegister(Register::A, getByte(fetchByte()));
 						break;
@@ -307,15 +307,15 @@ namespace gb_emu
 						uint8_t offset = fetchByte();
 						uint16_t value = addAndCalcCarry(SP, static_cast<uint16_t>(offset));
 						setRegister(RegisterPair::HL, value);
+						break;
 					}
-					break;
 					case Opcode_Exact::ADD_SP_n:
 					{
 						clearFlags();
 						uint8_t offset = fetchByte();
 						SP = addAndCalcCarry(SP, static_cast<uint16_t>(offset));
+						break;
 					}
-					break;
 					case Opcode_Exact::DI:
 						disableInterrupts();
 						break;
@@ -326,8 +326,8 @@ namespace gb_emu
 						doPrefixCBCommand();
 						break;
 					}
-				}
 					break;
+				}
 				}
 			}
 				break;
@@ -381,7 +381,6 @@ namespace gb_emu
 			setRegister(getRegisterPair_from_OpcodeRegisterPair(r), value);
 		}
 	}
-
 
 	void VM::ADC(Register r, uint8_t b)
 	{
@@ -503,8 +502,8 @@ namespace gb_emu
 				}
 				writeValue(reg, val);
 				setFlag(Flag::Z, val);
-			}
 				break;
+			}
 			case Opcode_Prefix_Misc1_Command_Groups::SWAP_SHIFT: // Swap/Shift Right, clear MSB
 			{
 				clearFlags();
@@ -520,31 +519,31 @@ namespace gb_emu
 				}
 				writeValue(reg, val);
 				setFlag(Flag::Z, val);
-			}
 				break;
 			}
-		}
+			}
 			break;
+		}
 		case Opcode_Prefix_Group::TEST_BIT:
 		{
 			uint8_t bit = (instruction >> 3) & 0x07;
 			setFlag(Flag::Z, readValue(reg) & (1 << bit));
 			setFlag(Flag::H);
 			clearFlag(Flag::N);
-		}
 			break;
+		}
 		case Opcode_Prefix_Group::CLEAR_BIT:
 		{
 			uint8_t bit = (instruction >> 3) & 0x07;
 			writeValue(reg, readValue(reg) & ~(1 << bit));
-		}
 			break;
+		}
 		case Opcode_Prefix_Group::SET_BIT:
 		{
 			uint8_t bit = (instruction >> 3) & 0x07;
 			writeValue(reg, readValue(reg) & (1 << bit));
-		}
 			break;
+		}
 		}
 	}
 	void VM::doArithmeticCommand(Opcode_Arithmetic_Command cmd, uint8_t operand)
@@ -576,24 +575,24 @@ namespace gb_emu
 			setRegister(Register::A, out);
 			setFlag(Flag::H);
 			setFlag(Flag::Z, out == 0);
+			break;
 		}
-		break;
 		case Opcode_Arithmetic_Command::XOR:
 		{
 			clearFlags();
 			uint8_t out = operand ^ regA;
 			setRegister(Register::A, out);
 			setFlag(Flag::Z, out == 0);
+			break;
 		}
-		break;
 		case Opcode_Arithmetic_Command::OR:
 		{
 			clearFlags();
 			uint8_t out = operand | regA;
 			setRegister(Register::A, out);
 			setFlag(Flag::Z, out == 0);
+			break;
 		}
-		break;
 		case Opcode_Arithmetic_Command::CP:
 			// CP is just a sub command, but with the result thrown away
 			// so we reset A to its original value
