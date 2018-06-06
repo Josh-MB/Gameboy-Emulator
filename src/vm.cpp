@@ -768,20 +768,35 @@ namespace gb_emu
 				if(bit3) // Shift right
 				{
 					setFlag(Flag::C, val & 0x01);
-					val >> 1;
+					val >>= 1;
 					if(val & 0x40) // Prevent MSB from changing
 						val |= 0x80;
 				}
 				else
 				{
 					setFlag(Flag::C, val & 0x80);
-					val << 1;
+					val <<= 1;
 				}
 				writeValue(reg, val);
 				setFlag(Flag::Z, val);
 			}
 				break;
 			case Opcode_Prefix_Misc1_Command_Groups::SWAP_SHIFT: // Swap/Shift Right, clear MSB
+			{
+				clearFlags();
+				uint8_t val = readValue(reg);
+				if(bit3) // Shift right
+				{
+					setFlag(Flag::C, val & 0x01);
+					val >>= 1;
+				}
+				else //swap
+				{
+					val = (val >> 4) | (val << 4);
+				}
+				writeValue(reg, val);
+				setFlag(Flag::Z, val);
+			}
 				break;
 			}
 		}
