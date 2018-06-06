@@ -5,7 +5,6 @@ namespace gb_emu
 {
 	ExecuteResult VM::run()
 	{
-
 		for(;;) {
 			uint8_t instruction = fetchByte();
 			switch(toEnum<Opcode_Group>(instruction))

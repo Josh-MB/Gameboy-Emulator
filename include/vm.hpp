@@ -114,82 +114,146 @@ namespace gb_emu
 		 * is actually a memory access (where HL stores the pointer)
 		 */
 		uint8_t readValue(Opcode_Register r) const;
+		/**
+		* Gets the byte referenced by the opcode register pair. This could be SP which
+		* is actually the stack pointer rather than a register pair
+		*/
 		uint16_t readValue(Opcode_Register_Pair r) const;
+		/**
+		* Gets the byte referenced by the opcode register pair. This could be HL+ or HL- which
+		* which both refer to HL, which is modified after the command (done later as this is a
+		* const function
+		*/
 		uint16_t readValue(Opcode_Register_Pair_Address r) const;
 		/**
 		 * Writes the byte to the target specified. Usually a register, unless
 		 * r = (HL), in which case it's a memory address (where HL stores the pointer)
 		 */
 		void writeValue(Opcode_Register r, uint8_t value);
+		/**
+		* Writes the byte to the target specified. Usually a register, but could
+		* be the stack pointer
+		*/
 		void writeValue(Opcode_Register_Pair r, uint16_t value);
 
+		/**
+		 * Get the value stored in the register
+		 */
 		uint8_t getRegister(Register r) const {
 			CHECK_REGISTER(r);
 			return registers[toUType(r)];
 		}
 
+		/**
+		 * Get the value stored in the register pair
+		 */
 		uint16_t getRegister(RegisterPair r) const {
 			return registerPairs[toUType(r)];
 		}
 
+		/**
+		 * Put byte into register
+		 */
 		void setRegister(Register r, uint8_t value) {
 			CHECK_REGISTER(r);
 			registers[toUType(r)] = value;
 		}
 
+		/**
+		 * Put double byte into register pair
+		 */
 		void setRegister(RegisterPair r, uint16_t value) {
 			registerPairs[toUType(r)] = value;
 		}
 
+		/**
+		 * Get byte from memory offset ($FF00 + addr)
+		 */
 		uint8_t getByte(uint8_t address) const {
 			return memory[0xFF00 + address];
 		}
 
+		/**
+		 * Get byte from 16 bit memory address
+		 */
 		uint8_t getByte(uint16_t address) const {
 			return memory[address];
 		}
 
+		/**
+		 * Set byte at memory offset ($FF00 + addr)
+		 */
 		void setByte(uint8_t address, uint8_t value) {
 			memory[0xFF00 + address] = value;
 		}
 
+		/**
+		 * Set byte at 16 bit memory address
+		 */
 		void setByte(uint16_t address, uint8_t value) {
 			memory[address] = value;
 		}
 
+		/**
+		 * Write double to memory, with LSB first
+		 */
 		void setDouble(uint16_t address, uint16_t value) {
 			memory[address] = static_cast<uint8_t>(value & 0xFF);
 			memory[address + 1] = static_cast<uint8_t>(value >> 8);
 		}
 
+		/**
+		 * Set flag if state otherwise clear
+		 */
 		void setFlag(Flag f, bool state) {
 			registers[toUType(Register::F)] |= (state * toUType(f));
 		}
 
+		/**
+		 * Set flag
+		 */
 		void setFlag(Flag f) {
 			registers[toUType(Register::F)] |= toUType(f);
 		}
 
+		/**
+		 * Clear flag
+		 */
 		void clearFlag(Flag f) {
 			registers[toUType(Register::F)] &= ~(toUType(f));
 		}
 
+		/**
+		 * Clear all flags
+		 */
 		void clearFlags() {
 			registers[toUType(Register::F)] = 0;
 		}
 
+		/**
+		 * Toggle flag
+		 */
 		void toggleFlag(Flag f) {
 			registers[toUType(Register::F)] ^= toUType(f);
 		}
 
+		/**
+		 * Get flag state
+		 */
 		bool getFlag(Flag f) const {
 			return (registers[toUType(Register::F)] & toUType(f)) != 0;
 		}
 
+		/**
+		 * Increment program counter by offset
+		 */
 		void shortJump(uint8_t offset) {
 			PC += offset;
 		}
 
+		/**
+		 * Set program counter to addr
+		 */
 		void longJump(uint16_t addr) {
 			PC = addr;
 		}
@@ -213,9 +277,17 @@ namespace gb_emu
 		void doPrefixCBCommand();
 		void doArithmeticCommand(Opcode_Arithmetic_Command cmd, uint8_t operand);
 
+		/**
+		 * Adds two values and returns the result
+		 * while also calculating the carry and half
+		 * carry flags
+		 */
 		uint8_t addAndCalcCarry(uint8_t a, uint8_t b);
 		uint16_t addAndCalcCarry(uint16_t a, uint16_t b);
 
+		/**
+		 * Rotates the register left or right, and through the carry bit or not
+		 */
 		void rotate(Opcode_Register r, bool right, bool throughCarry);
 	};
 }
