@@ -47,6 +47,19 @@ namespace gb_emu
 			return static_cast<RegisterPair>(r);
 	}
 
+	inline Opcode_Register decodeRegister(uint8_t instruction, bool lower = false) {
+		if(!lower) instruction >>= 3;
+		return static_cast<Opcode_Register>(instruction & 0x07);
+	}
+
+	inline Opcode_Register_Pair decodeRegisterPair(uint8_t instruction) {
+		return static_cast<Opcode_Register_Pair>((instruction >> 4) & 0x3);
+	}
+
+	inline Opcode_Register_Pair_Address decodeRegisterPairAddress(uint8_t instruction) {
+		return static_cast<Opcode_Register_Pair_Address>((instruction >> 4) & 0x03);
+	}
+
 	enum class Flag : uint8_t {
 		Z = 1<<7, // Set if result is zero
 		N = 1<<6, // Set if subtract

@@ -46,14 +46,11 @@ namespace gb_emu
 				}
 					break;
 				case Opcode_Misc1_Command_Groups::LD_r1_d16:
-				{
-					Opcode_Register_Pair reg = static_cast<Opcode_Register_Pair>((instruction >> 4) | 0x03);
-					writeValue(reg, fetchDouble());
-				}
+					writeValue(decodeRegisterPair(instruction), fetchDouble());
 					break;
 				case Opcode_Misc1_Command_Groups::LD_add_A:
 				{
-					Opcode_Register_Pair_Address reg = static_cast<Opcode_Register_Pair_Address>((instruction >> 4) | 0x03);
+					Opcode_Register_Pair_Address reg = decodeRegisterPairAddress(instruction);
 					uint8_t value = getRegister(Register::A);
 					uint16_t addr = readValue(reg);
 					if(reg == Opcode_Register_Pair_Address::HL_plus)
@@ -65,34 +62,24 @@ namespace gb_emu
 					break;
 				case Opcode_Misc1_Command_Groups::INC_rr:
 				{
-					Opcode_Register_Pair reg = static_cast<Opcode_Register_Pair>((instruction >> 4) | 0x03);
+					Opcode_Register_Pair reg = decodeRegisterPair(instruction);
 					uint16_t value = readValue(reg);
 					writeValue(reg, ++value);
 				}
 					break;
 				case Opcode_Misc1_Command_Groups::INC_r_1:
 				case Opcode_Misc1_Command_Groups::INC_r_2:
-				{
-					Opcode_Register r = static_cast<Opcode_Register>((instruction >> 3) | 0x07);
 					clearFlag(Flag::C);
-					ADC(getRegister_from_OpcodeRegister(r), 1);
-				}
+					ADC(getRegister_from_OpcodeRegister(decodeRegister(instruction)), 1);
 					break;
 				case Opcode_Misc1_Command_Groups::DEC_r_1:
 				case Opcode_Misc1_Command_Groups::DEC_r_2:
-				{
-					Opcode_Register r = static_cast<Opcode_Register>((instruction >> 3) | 0x07);
 					clearFlag(Flag::C);
-					SBC(getRegister_from_OpcodeRegister(r), 1);
-				}
+					SBC(getRegister_from_OpcodeRegister(decodeRegister(instruction)), 1);
 					break;
 				case Opcode_Misc1_Command_Groups::LD_r1_d8_1:
 				case Opcode_Misc1_Command_Groups::LD_r1_d8_2:
-				{
-					Opcode_Register r = static_cast<Opcode_Register>((instruction >> 3) | 0x07);
-					uint8_t value = fetchByte();
-					writeValue(r, value);
-				}
+					writeValue(decodeRegister(instruction), fetchByte());
 					break;
 				case Opcode_Misc1_Command_Groups::MISC2:
 				{
@@ -167,8 +154,7 @@ namespace gb_emu
 					break;
 				case Opcode_Misc1_Command_Groups::ADD_HL_rr1:
 				{
-					Opcode_Register_Pair rr = static_cast<Opcode_Register_Pair>((instruction >> 4) | 0x03);
-					uint16_t value = readValue(rr);
+					uint16_t value = readValue(decodeRegisterPair(instruction));
 					uint16_t HLvalue = getRegister(RegisterPair::HL);
 					uint16_t outValue = addAndCalcCarry(HLvalue, value);
 					setRegister(RegisterPair::HL, outValue);
@@ -178,7 +164,7 @@ namespace gb_emu
 					break;
 				case Opcode_Misc1_Command_Groups::LD_A_add:
 				{
-					Opcode_Register_Pair_Address reg = static_cast<Opcode_Register_Pair_Address>((instruction >> 4) | 0x03);
+					Opcode_Register_Pair_Address reg = decodeRegisterPairAddress(instruction);
 					uint16_t addr = readValue(reg);
 					uint8_t value = getByte(addr);
 					if(reg == Opcode_Register_Pair_Address::HL_plus)
@@ -190,7 +176,7 @@ namespace gb_emu
 				break;
 				case Opcode_Misc1_Command_Groups::DEC_rr:
 				{
-					Opcode_Register_Pair rr = static_cast<Opcode_Register_Pair>((instruction >> 4) | 0x03);
+					Opcode_Register_Pair rr = decodeRegisterPair(instruction);
 					uint16_t value = readValue(rr);
 					writeValue(rr, --value);
 				}
@@ -245,8 +231,8 @@ namespace gb_emu
 					// Halt. Power down CPU until interrupt occurs
 				}
 				else {
-					Opcode_Register r1 = static_cast<Opcode_Register>((instruction >> 3) | 0x07);
-					Opcode_Register r2 = static_cast<Opcode_Register>(instruction | 0x07);
+					Opcode_Register r1 = decodeRegister(instruction);
+					Opcode_Register r2 = decodeRegister(instruction, true);
 					uint8_t value = readValue(r2);
 					writeValue(r1, value);
 				}
@@ -254,7 +240,7 @@ namespace gb_emu
 				break;
 			case Opcode_Group::ARITH:
 			{
-				Opcode_Register reg = static_cast<Opcode_Register>(instruction | 0x07);
+				Opcode_Register reg = decodeRegister(instruction, true);
 				doArithmeticCommand(static_cast<Opcode_Arithmetic_Command>((instruction >> 3) | 0x07), readValue(reg));
 			}
 				break;
@@ -264,16 +250,10 @@ namespace gb_emu
 				switch(cmd)
 				{
 				case Opcode_Misc2_Command_Groups::POP:
-				{
-					Opcode_Register_Pair rr = static_cast<Opcode_Register_Pair>((instruction >> 4) | 0x03);
-					writeValue(rr, pop_double());
-				}
+					writeValue(decodeRegisterPair(instruction), pop_double());
 					break;
 				case Opcode_Misc2_Command_Groups::PUSH:
-				{
-					Opcode_Register_Pair rr = static_cast<Opcode_Register_Pair>((instruction >> 4) | 0x03);
-					push_double(readValue(rr));
-				}
+					push_double(readValue(decodeRegisterPair(instruction)));
 					break;
 				case Opcode_Misc2_Command_Groups::ARITH_1:
 				case Opcode_Misc2_Command_Groups::ARITH_2:
@@ -281,11 +261,8 @@ namespace gb_emu
 					break;
 				case Opcode_Misc2_Command_Groups::RST_1:
 				case Opcode_Misc2_Command_Groups::RST_2:
-				{
-					uint8_t rst_address = (instruction >> 3) & 0xF;
 					push_double(PC);
-					longJump(rst_address);
-				}
+					longJump(instruction & 0x38);
 					break;
 				default:
 				{
@@ -560,7 +537,7 @@ namespace gb_emu
 	void VM::doPrefixCBCommand()
 	{
 		uint8_t instruction = fetchByte();
-		Opcode_Register reg = static_cast<Opcode_Register>(instruction & 0x3);
+		Opcode_Register reg = decodeRegister(instruction, true);
 		switch(static_cast<Opcode_Prefix_Group>(instruction) & Opcode_Prefix_Group::MASK)
 		{
 		case Opcode_Prefix_Group::MISC1:
@@ -647,7 +624,7 @@ namespace gb_emu
 			break;
 		case Opcode_Prefix_Group::TEST_BIT:
 		{
-			uint8_t bit = (instruction >> 3) & 0x3;
+			uint8_t bit = (instruction >> 3) & 0x07;
 			setFlag(Flag::Z, readValue(reg) & (1 << bit));
 			setFlag(Flag::H);
 			clearFlag(Flag::N);
@@ -655,13 +632,13 @@ namespace gb_emu
 			break;
 		case Opcode_Prefix_Group::CLEAR_BIT:
 		{
-			uint8_t bit = (instruction >> 3) & 0x3;
+			uint8_t bit = (instruction >> 3) & 0x07;
 			writeValue(reg, readValue(reg) & ~(1 << bit));
 		}
 			break;
 		case Opcode_Prefix_Group::SET_BIT:
 		{
-			uint8_t bit = (instruction >> 3) & 0x3;
+			uint8_t bit = (instruction >> 3) & 0x07;
 			writeValue(reg, readValue(reg) & (1 << bit));
 		}
 			break;
