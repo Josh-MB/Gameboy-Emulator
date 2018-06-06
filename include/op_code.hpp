@@ -15,10 +15,6 @@ namespace gb_emu
 		MASK = 0xC0,
 	};
 
-	constexpr Opcode_Group operator & (Opcode_Group lhs, Opcode_Group rhs) {
-		return static_cast<Opcode_Group>(static_cast<uint8_t>(lhs) & static_cast<uint8_t>(rhs));
-	}
-
 	enum class Opcode : uint8_t {
 		// HALT (p.97)
 		// Power down CPU unitl interrupt occurs (saves power). 4 cycles
@@ -74,6 +70,7 @@ namespace gb_emu
 		INC_r_2 = 0xC,
 		DEC_r_2 = 0xD,
 		LD_r1_d8_2 = 0xE,
+		MASK = 0xF,
 	};
 
 	enum class Opcode_Misc2_Command_Groups : uint8_t {
@@ -83,6 +80,7 @@ namespace gb_emu
 		RST_1 = 0x7,
 		ARITH_2 = 0xE,
 		RST_2 = 0xF,
+		MASK = 0xF,
 	};
 
 	enum class Opcode_Prefix_Group : uint8_t {
@@ -93,10 +91,6 @@ namespace gb_emu
 		MASK = 0xC0,
 	};
 
-	constexpr Opcode_Prefix_Group operator & (Opcode_Prefix_Group lhs, Opcode_Prefix_Group rhs) {
-		return static_cast<Opcode_Prefix_Group>(static_cast<uint8_t>(lhs) & static_cast<uint8_t>(rhs));
-	}
-
 	enum class Opcode_Prefix_Misc1_Command_Groups : uint8_t {
 		ROTATE = 0x0,
 		ROTATE_THRU_CARRY = 0x10,
@@ -104,16 +98,6 @@ namespace gb_emu
 		SWAP_SHIFT = 0x30,
 		MASK = 0xF0,
 	};
-
-	constexpr Opcode_Prefix_Misc1_Command_Groups operator & (Opcode_Prefix_Misc1_Command_Groups lhs, Opcode_Prefix_Misc1_Command_Groups rhs) {
-		return static_cast<Opcode_Prefix_Misc1_Command_Groups>(static_cast<uint8_t>(lhs) & static_cast<uint8_t>(rhs));
-	}
-
-	/*struct LD_Op {
-		Opcode op;
-		Register r1, r2;
-		LD_Op(uint8_t opcode) : op{opcode & static_cast<uint8_t>(Opcode_Group::MASK)}, r1(opcode & 0x38), r2(opcode & 0x07) {}
-	};*/
 
 	/**
 	 * GB Opcodes as provided by the GP CPU Manual from p.65
@@ -609,6 +593,7 @@ namespace gb_emu
 			// then enable interupts
 			// 8 cycles
 			RETI = 0xD9,
+			MASK = 0xFF,
 	};
 
 	enum class CB_Opcode_Exact : uint8_t {

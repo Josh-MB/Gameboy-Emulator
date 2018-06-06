@@ -8,12 +8,10 @@ namespace gb_emu
 
 		for(;;) {
 			uint8_t instruction = fetchByte();
-			switch(static_cast<Opcode_Group>(instruction) & Opcode_Group::MASK)
+			switch(toEnum<Opcode_Group>(instruction))
 			{
 			case Opcode_Group::MISC1:
-			{
-				Opcode_Misc1_Command_Groups cmd = static_cast<Opcode_Misc1_Command_Groups>(instruction | 0x0F);
-				switch(cmd)
+				switch(toEnum<Opcode_Misc1_Command_Groups>(instruction))
 				{
 				case Opcode_Misc1_Command_Groups::LD_r1_d16:
 					writeValue(decodeRegisterPair(instruction), fetchDouble());
@@ -81,9 +79,7 @@ namespace gb_emu
 					break;
 				}
 				default:
-				{
-					Opcode_Exact op = static_cast<Opcode_Exact>(instruction);
-					switch(op)
+					switch(toEnum<Opcode_Exact>(instruction))
 					{
 					case Opcode_Exact::NOP:
 						// Do Noop for 4 cycles
@@ -156,12 +152,10 @@ namespace gb_emu
 					}
 					break;
 				}
-				}
-			}
 				break;
 			case Opcode_Group::LD:
 			{
-				if(static_cast<Opcode>(instruction) == Opcode::HALT) {
+				if(static_cast<Opcode_Exact>(instruction) == Opcode_Exact::HALT) {
 					// Halt. Power down CPU until interrupt occurs
 				}
 				else {
@@ -175,13 +169,11 @@ namespace gb_emu
 			case Opcode_Group::ARITH:
 			{
 				Opcode_Register reg = decodeRegister(instruction, true);
-				doArithmeticCommand(static_cast<Opcode_Arithmetic_Command>((instruction >> 3) | 0x07), readValue(reg));
+				doArithmeticCommand(static_cast<Opcode_Arithmetic_Command>((instruction >> 3) & 0x07), readValue(reg));
 				break;
 			}
 			case Opcode_Group::MISC2:
-			{
-				Opcode_Misc2_Command_Groups cmd = static_cast<Opcode_Misc2_Command_Groups>(instruction | 0x0F);
-				switch(cmd)
+				switch(toEnum<Opcode_Misc2_Command_Groups>(instruction))
 				{
 				case Opcode_Misc2_Command_Groups::POP:
 					writeValue(decodeRegisterPair(instruction), pop_double());
@@ -191,7 +183,7 @@ namespace gb_emu
 					break;
 				case Opcode_Misc2_Command_Groups::ARITH_1:
 				case Opcode_Misc2_Command_Groups::ARITH_2:
-					doArithmeticCommand(static_cast<Opcode_Arithmetic_Command>((instruction >> 3) | 0x07), fetchByte());
+					doArithmeticCommand(static_cast<Opcode_Arithmetic_Command>((instruction >> 3) & 0x07), fetchByte());
 					break;
 				case Opcode_Misc2_Command_Groups::RST_1:
 				case Opcode_Misc2_Command_Groups::RST_2:
@@ -329,7 +321,6 @@ namespace gb_emu
 					break;
 				}
 				}
-			}
 				break;
 			default:
 				return ExecuteResult::RUNTIME_ERROR;
@@ -471,12 +462,12 @@ namespace gb_emu
 	{
 		uint8_t instruction = fetchByte();
 		Opcode_Register reg = decodeRegister(instruction, true);
-		switch(static_cast<Opcode_Prefix_Group>(instruction) & Opcode_Prefix_Group::MASK)
+		switch(toEnum<Opcode_Prefix_Group>(instruction))
 		{
 		case Opcode_Prefix_Group::MISC1:
 		{
 			bool bit3 = instruction & 0x08;
-			switch(static_cast<Opcode_Prefix_Misc1_Command_Groups>(instruction) & Opcode_Prefix_Misc1_Command_Groups::MASK)
+			switch(toEnum<Opcode_Prefix_Misc1_Command_Groups>(instruction))
 			{
 			case Opcode_Prefix_Misc1_Command_Groups::ROTATE:
 				rotate(reg, bit3, false);
