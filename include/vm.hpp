@@ -172,5 +172,11 @@ namespace gb_emu
 
 		void ret();
 		void call(uint16_t addr);
+
+		void enableInterrupts();
+		void disableInterrupts();
+
+		void doPrefixCBCommand();
+
 	};
 }

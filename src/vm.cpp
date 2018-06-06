@@ -544,6 +544,26 @@ namespace gb_emu
 						setFlag(Flag::C, SP > 0xFFFF - offset);
 					}
 					break;
+					case Opcode_Exact::ADD_SP_n:
+					{
+						clearFlags();
+						uint8_t offset = getByte(PC++);
+						uint16_t newSP = SP + offset;
+						uint16_t carry = newSP ^ SP ^ offset;
+						setFlag(Flag::H, carry & 0x10);
+						setFlag(Flag::C, SP > 0xFFFF - offset);
+						SP = newSP;
+					}
+					break;
+					case Opcode_Exact::DI:
+						disableInterrupts();
+						break;
+					case Opcode_Exact::EI:
+						enableInterrupts();
+						break;
+					case Opcode_Exact::CB:
+						doPrefixCBCommand();
+						break;
 					}
 				}
 					break;
@@ -680,5 +700,14 @@ namespace gb_emu
 	{
 		push_double(PC + 1);
 		longJump(addr);
+	}
+	void VM::enableInterrupts()
+	{
+	}
+	void VM::disableInterrupts()
+	{
+	}
+	void VM::doPrefixCBCommand()
+	{
 	}
 }
