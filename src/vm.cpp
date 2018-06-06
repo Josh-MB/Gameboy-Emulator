@@ -254,64 +254,8 @@ namespace gb_emu
 				break;
 			case Opcode_Group::ARITH:
 			{
-				Opcode_Arithmetic_Command cmd = static_cast<Opcode_Arithmetic_Command>((instruction >> 3) | 0x07);
 				Opcode_Register reg = static_cast<Opcode_Register>(instruction | 0x07);
-
-				uint8_t value = readValue(reg);
-
-				uint8_t regA = getRegister(Register::A);
-				switch(cmd)
-				{
-				case Opcode_Arithmetic_Command::ADD:
-					// Perform an ADC with no carry bit
-					clearFlag(Flag::C);
-					ADC(Register::A, value);
-					break;
-				case Opcode_Arithmetic_Command::ADC:
-					ADC(Register::A, value);
-					break;
-				case Opcode_Arithmetic_Command::SUB:
-					// Perform an SBC with "no" carry bit (Since it is
-					// sub, we invert the meaning of carry and so set C)
-					clearFlag(Flag::C);
-					SBC(Register::A, value);
-					break;
-				case Opcode_Arithmetic_Command::SBC:
-					SBC(Register::A, value);
-					break;
-				case Opcode_Arithmetic_Command::AND:
-				{
-					clearFlags();
-					uint8_t out = value & regA;
-					setRegister(Register::A, out);
-					setFlag(Flag::H);
-					setFlag(Flag::Z, out == 0);
-				}
-					break;
-				case Opcode_Arithmetic_Command::XOR:
-				{
-					clearFlags();
-					uint8_t out = value ^ regA;
-					setRegister(Register::A, out);
-					setFlag(Flag::Z, out == 0);
-				}
-				break;
-				case Opcode_Arithmetic_Command::OR:
-				{
-					clearFlags();
-					uint8_t out = value | regA;
-					setRegister(Register::A, out);
-					setFlag(Flag::Z, out == 0);
-				}
-				break;
-				case Opcode_Arithmetic_Command::CP:
-					// CP is just a sub command, but with the result thrown away
-					// so we reset A to its original value
-					clearFlags();
-					SBC(Register::A, value);
-					setRegister(Register::A, regA);
-					break;
-				}
+				doArithmeticCommand(static_cast<Opcode_Arithmetic_Command>((instruction >> 3) | 0x07), readValue(reg));
 			}
 				break;
 			case Opcode_Group::MISC2:
@@ -333,63 +277,7 @@ namespace gb_emu
 					break;
 				case Opcode_Misc2_Command_Groups::ARITH_1:
 				case Opcode_Misc2_Command_Groups::ARITH_2:
-				{
-					uint8_t value = fetchByte();
-					uint8_t regA = getRegister(Register::A);
-					Opcode_Arithmetic_Command arith_cmd = static_cast<Opcode_Arithmetic_Command>((instruction >> 3) | 0x07);
-					switch(arith_cmd)
-					{
-					case Opcode_Arithmetic_Command::ADD:
-						// Perform an ADC with no carry bit
-						clearFlag(Flag::C);
-						ADC(Register::A, value);
-						break;
-					case Opcode_Arithmetic_Command::ADC:
-						ADC(Register::A, value);
-						break;
-					case Opcode_Arithmetic_Command::SUB:
-						// Perform an SBC with "no" carry bit (Since it is
-						// sub, we invert the meaning of carry and so set C)
-						clearFlag(Flag::C);
-						SBC(Register::A, value);
-						break;
-					case Opcode_Arithmetic_Command::SBC:
-						SBC(Register::A, value);
-						break;
-					case Opcode_Arithmetic_Command::AND:
-					{
-						clearFlags();
-						uint8_t out = value & regA;
-						setRegister(Register::A, out);
-						setFlag(Flag::H);
-						setFlag(Flag::Z, out == 0);
-					}
-					break;
-					case Opcode_Arithmetic_Command::XOR:
-					{
-						clearFlags();
-						uint8_t out = value ^ regA;
-						setRegister(Register::A, out);
-						setFlag(Flag::Z, out == 0);
-					}
-					break;
-					case Opcode_Arithmetic_Command::OR:
-					{
-						clearFlags();
-						uint8_t out = value | regA;
-						setRegister(Register::A, out);
-						setFlag(Flag::Z, out == 0);
-					}
-					break;
-					case Opcode_Arithmetic_Command::CP:
-						// CP is just a sub command, but with the result thrown away
-						// so we reset A to its original value
-						clearFlags();
-						SBC(Register::A, value);
-						setRegister(Register::A, regA);
-						break;
-					}
-				}
+					doArithmeticCommand(static_cast<Opcode_Arithmetic_Command>((instruction >> 3) | 0x07), fetchByte());
 					break;
 				case Opcode_Misc2_Command_Groups::RST_1:
 				case Opcode_Misc2_Command_Groups::RST_2:
@@ -779,6 +667,63 @@ namespace gb_emu
 			break;
 		}
 	}
+	void VM::doArithmeticCommand(Opcode_Arithmetic_Command cmd, uint8_t operand)
+	{
+		uint8_t regA = getRegister(Register::A);
+		switch(cmd)
+		{
+		case Opcode_Arithmetic_Command::ADD:
+			// Perform an ADC with no carry bit
+			clearFlag(Flag::C);
+			ADC(Register::A, operand);
+			break;
+		case Opcode_Arithmetic_Command::ADC:
+			ADC(Register::A, operand);
+			break;
+		case Opcode_Arithmetic_Command::SUB:
+			// Perform an SBC with "no" carry bit (Since it is
+			// sub, we invert the meaning of carry and so set C)
+			clearFlag(Flag::C);
+			SBC(Register::A, operand);
+			break;
+		case Opcode_Arithmetic_Command::SBC:
+			SBC(Register::A, operand);
+			break;
+		case Opcode_Arithmetic_Command::AND:
+		{
+			clearFlags();
+			uint8_t out = operand & regA;
+			setRegister(Register::A, out);
+			setFlag(Flag::H);
+			setFlag(Flag::Z, out == 0);
+		}
+		break;
+		case Opcode_Arithmetic_Command::XOR:
+		{
+			clearFlags();
+			uint8_t out = operand ^ regA;
+			setRegister(Register::A, out);
+			setFlag(Flag::Z, out == 0);
+		}
+		break;
+		case Opcode_Arithmetic_Command::OR:
+		{
+			clearFlags();
+			uint8_t out = operand | regA;
+			setRegister(Register::A, out);
+			setFlag(Flag::Z, out == 0);
+		}
+		break;
+		case Opcode_Arithmetic_Command::CP:
+			// CP is just a sub command, but with the result thrown away
+			// so we reset A to its original value
+			clearFlags();
+			SBC(Register::A, operand);
+			setRegister(Register::A, regA);
+			break;
+		}
+	}
+
 	uint8_t VM::addAndCalcCarry(uint8_t a, uint8_t b)
 	{
 		uint8_t ret = a + b;

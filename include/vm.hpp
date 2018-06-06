@@ -198,6 +198,7 @@ namespace gb_emu
 		void disableInterrupts();
 
 		void doPrefixCBCommand();
+		void doArithmeticCommand(Opcode_Arithmetic_Command cmd, uint8_t operand);
 
 		uint8_t addAndCalcCarry(uint8_t a, uint8_t b);
 		uint16_t addAndCalcCarry(uint16_t a, uint16_t b);
