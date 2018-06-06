@@ -170,10 +170,7 @@ namespace gb_emu
 					Opcode_Register_Pair rr = static_cast<Opcode_Register_Pair>((instruction >> 4) | 0x03);
 					uint16_t value = readValue(rr);
 					uint16_t HLvalue = getRegister(RegisterPair::HL);
-					setFlag(Flag::C, (HLvalue > 0xFFFF - value));
-					uint16_t outValue = HLvalue + value;
-					uint16_t carryIns = HLvalue ^ value ^ outValue;
-					setFlag(Flag::H, ((carryIns >> 12) & 1));
+					uint16_t outValue = addAndCalcCarry(HLvalue, value);
 					setRegister(RegisterPair::HL, outValue);
 					clearFlag(Flag::N);
 					setFlag(Flag::Z, outValue == 0);
@@ -506,24 +503,18 @@ namespace gb_emu
 						break;
 					case Opcode_Exact::LDHL_SP_n:
 					{
+						// This assumes the command just stores the address SP+n into HL, not *(SP+n)
 						clearFlags();
 						uint8_t offset = fetchByte();
-						uint16_t addr = SP + offset;
-						setRegister(RegisterPair::HL, addr);
-						uint16_t carry = addr ^ SP ^ offset;
-						setFlag(Flag::H, carry & 0x10);
-						setFlag(Flag::C, SP > 0xFFFF - offset);
+						uint16_t value = addAndCalcCarry(SP, static_cast<uint16_t>(offset));
+						setRegister(RegisterPair::HL, value);
 					}
 					break;
 					case Opcode_Exact::ADD_SP_n:
 					{
 						clearFlags();
 						uint8_t offset = fetchByte();
-						uint16_t newSP = SP + offset;
-						uint16_t carry = newSP ^ SP ^ offset;
-						setFlag(Flag::H, carry & 0x10);
-						setFlag(Flag::C, SP > 0xFFFF - offset);
-						SP = newSP;
+						SP = addAndCalcCarry(SP, static_cast<uint16_t>(offset));
 					}
 					break;
 					case Opcode_Exact::DI:
@@ -608,7 +599,7 @@ namespace gb_emu
 			outValue = regValue + b;
 		}
 		uint8_t carryIns = regValue ^ b ^ outValue;
-		setFlag(Flag::H, ((carryIns >> 4) & 1));
+		setFlag(Flag::H, carryIns & 0x10);
 		setRegister(r, outValue);
 		clearFlag(Flag::N);
 		setFlag(Flag::Z, outValue == 0);
@@ -787,5 +778,22 @@ namespace gb_emu
 		}
 			break;
 		}
+	}
+	uint8_t VM::addAndCalcCarry(uint8_t a, uint8_t b)
+	{
+		uint8_t ret = a + b;
+		uint8_t carry = a ^ b ^ ret; // bit n is set if carry from bit n-1
+		setFlag(Flag::H, carry & 0x10);
+		setFlag(Flag::C, a > 0xFF - b);
+		return ret;
+	}
+
+	uint16_t VM::addAndCalcCarry(uint16_t a, uint16_t b)
+	{
+		uint16_t ret = a + b;
+		uint16_t carry = a ^ b ^ ret;
+		setFlag(Flag::H, carry & 0x1000);
+		setFlag(Flag::C, a > 0xFFFF - b);
+		return ret;
 	}
 }
