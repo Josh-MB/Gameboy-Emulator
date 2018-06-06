@@ -62,22 +62,18 @@ namespace gb_emu
 	};
 
 	enum class Opcode_Misc1_Command_Groups : uint8_t {
-		MISC1 = 0x0,
 		LD_r1_d16 = 0x1,
 		LD_add_A = 0x2,
 		INC_rr = 0x3,
 		INC_r_1 = 0x4,
 		DEC_r_1 = 0x5,
 		LD_r1_d8_1 = 0x6,
-		MISC2 = 0x7,
-		MISC3 = 0x8,
 		ADD_HL_rr1 = 0x9,
 		LD_A_add = 0xA,
 		DEC_rr = 0xB,
 		INC_r_2 = 0xC,
 		DEC_r_2 = 0xD,
 		LD_r1_d8_2 = 0xE,
-		MISC4 = 0xF,
 	};
 
 	enum class Opcode_Misc2_Command_Groups : uint8_t {

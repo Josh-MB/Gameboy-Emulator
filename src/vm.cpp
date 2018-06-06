@@ -15,36 +15,6 @@ namespace gb_emu
 				Opcode_Misc1_Command_Groups cmd = static_cast<Opcode_Misc1_Command_Groups>(instruction | 0x0F);
 				switch(cmd)
 				{
-				case Opcode_Misc1_Command_Groups::MISC1:
-				{
-					Opcode_Exact op = static_cast<Opcode_Exact>(instruction);
-					switch(op)
-					{
-					case Opcode_Exact::NOP:
-						// Do Noop for 4 cycles
-						break;
-					case Opcode_Exact::STOP:
-						// Halt CPU and LCD until button press (interrupt?)
-						break;
-					case Opcode_Exact::JR_NZ_n:
-					{
-						uint8_t offset = fetchByte();
-						if(!getFlag(Flag::Z)) {
-							shortJump(offset);
-						}
-					}
-					break;
-					case Opcode_Exact::JR_NC_n:
-					{
-						uint8_t offset = fetchByte();
-						if(!getFlag(Flag::C)) {
-							shortJump(offset);
-						}
-					}
-					break;
-					}
-				}
-					break;
 				case Opcode_Misc1_Command_Groups::LD_r1_d16:
 					writeValue(decodeRegisterPair(instruction), fetchDouble());
 					break;
@@ -58,88 +28,11 @@ namespace gb_emu
 					else if(reg == Opcode_Register_Pair_Address::HL_minus)
 						setRegister(RegisterPair::HL, getRegister(RegisterPair::HL) - 1);
 					setByte(addr, value);
+					break;
 				}
-					break;
-				case Opcode_Misc1_Command_Groups::INC_rr:
-				{
-					Opcode_Register_Pair reg = decodeRegisterPair(instruction);
-					uint16_t value = readValue(reg);
-					writeValue(reg, ++value);
-				}
-					break;
-				case Opcode_Misc1_Command_Groups::INC_r_1:
-				case Opcode_Misc1_Command_Groups::INC_r_2:
-					clearFlag(Flag::C);
-					ADC(getRegister_from_OpcodeRegister(decodeRegister(instruction)), 1);
-					break;
-				case Opcode_Misc1_Command_Groups::DEC_r_1:
-				case Opcode_Misc1_Command_Groups::DEC_r_2:
-					clearFlag(Flag::C);
-					SBC(getRegister_from_OpcodeRegister(decodeRegister(instruction)), 1);
-					break;
 				case Opcode_Misc1_Command_Groups::LD_r1_d8_1:
 				case Opcode_Misc1_Command_Groups::LD_r1_d8_2:
 					writeValue(decodeRegister(instruction), fetchByte());
-					break;
-				case Opcode_Misc1_Command_Groups::MISC2:
-				{
-					Opcode_Exact op = static_cast<Opcode_Exact>(instruction);
-					switch(op)
-					{
-					case Opcode_Exact::RLCA:
-						rotate(Opcode_Register::A, false, false);
-						break;
-					case Opcode_Exact::RLA:
-						rotate(Opcode_Register::A, false, true);
-						break;
-					case Opcode_Exact::DAA:
-						DAA();
-					break;
-					case Opcode_Exact::SCF:
-						setFlag(Flag::C);
-					break;
-					}
-				}
-					break;
-				case Opcode_Misc1_Command_Groups::MISC3:
-				{
-					Opcode_Exact op = static_cast<Opcode_Exact>(instruction);
-					switch(op)
-					{
-					case Opcode_Exact::LD_nn_SP:
-						setDouble(fetchDouble(), SP);
-						break;
-					case Opcode_Exact::JR_n:
-						shortJump(fetchByte());
-						break;
-					case Opcode_Exact::JR_Z_n:
-					{
-						uint8_t offset = fetchByte();
-						if(getFlag(Flag::Z)) {
-							shortJump(offset);
-						}
-					}
-					break;
-					case Opcode_Exact::JR_C_n:
-					{
-						uint8_t offset = fetchByte();
-						if(getFlag(Flag::C)) {
-							shortJump(offset);
-						}
-					}
-					break;
-					}
-				}
-					break;
-				case Opcode_Misc1_Command_Groups::ADD_HL_rr1:
-				{
-					uint16_t value = readValue(decodeRegisterPair(instruction));
-					uint16_t HLvalue = getRegister(RegisterPair::HL);
-					uint16_t outValue = addAndCalcCarry(HLvalue, value);
-					setRegister(RegisterPair::HL, outValue);
-					clearFlag(Flag::N);
-					setFlag(Flag::Z, outValue == 0);
-				}
 					break;
 				case Opcode_Misc1_Command_Groups::LD_A_add:
 				{
@@ -151,25 +44,105 @@ namespace gb_emu
 					else if(reg == Opcode_Register_Pair_Address::HL_minus)
 						setRegister(RegisterPair::HL, getRegister(RegisterPair::HL) - 1);
 					setRegister(Register::A, value);
+					break;
 				}
-				break;
+				case Opcode_Misc1_Command_Groups::INC_r_1:
+				case Opcode_Misc1_Command_Groups::INC_r_2:
+					clearFlag(Flag::C);
+					ADC(getRegister_from_OpcodeRegister(decodeRegister(instruction)), 1);
+					break;
+				case Opcode_Misc1_Command_Groups::INC_rr:
+				{
+					Opcode_Register_Pair reg = decodeRegisterPair(instruction);
+					uint16_t value = readValue(reg);
+					writeValue(reg, ++value);
+					break;
+				}
+				case Opcode_Misc1_Command_Groups::DEC_r_1:
+				case Opcode_Misc1_Command_Groups::DEC_r_2:
+					clearFlag(Flag::C);
+					SBC(getRegister_from_OpcodeRegister(decodeRegister(instruction)), 1);
+					break;
 				case Opcode_Misc1_Command_Groups::DEC_rr:
 				{
 					Opcode_Register_Pair rr = decodeRegisterPair(instruction);
 					uint16_t value = readValue(rr);
 					writeValue(rr, --value);
-				}
 					break;
-				case Opcode_Misc1_Command_Groups::MISC4:
+				}
+				case Opcode_Misc1_Command_Groups::ADD_HL_rr1:
+				{
+					uint16_t value = readValue(decodeRegisterPair(instruction));
+					uint16_t HLvalue = getRegister(RegisterPair::HL);
+					uint16_t outValue = addAndCalcCarry(HLvalue, value);
+					setRegister(RegisterPair::HL, outValue);
+					clearFlag(Flag::N);
+					setFlag(Flag::Z, outValue == 0);
+					break;
+				}
+				default:
 				{
 					Opcode_Exact op = static_cast<Opcode_Exact>(instruction);
 					switch(op)
 					{
+					case Opcode_Exact::NOP:
+						// Do Noop for 4 cycles
+						break;
+					case Opcode_Exact::STOP:
+						// Halt CPU and LCD until button press (interrupt?)
+						break;
+					case Opcode_Exact::JR_n:
+						shortJump(fetchByte());
+						break;
+					case Opcode_Exact::JR_Z_n:
+					{
+						uint8_t offset = fetchByte();
+						if(getFlag(Flag::Z)) {
+							shortJump(offset);
+						}
+						break;
+					}
+					case Opcode_Exact::JR_C_n:
+					{
+						uint8_t offset = fetchByte();
+						if(getFlag(Flag::C)) {
+							shortJump(offset);
+						}
+						break;
+					}
+					case Opcode_Exact::JR_NZ_n:
+					{
+						uint8_t offset = fetchByte();
+						if(!getFlag(Flag::Z)) {
+							shortJump(offset);
+						}
+						break;
+					}
+					case Opcode_Exact::JR_NC_n:
+					{
+						uint8_t offset = fetchByte();
+						if(!getFlag(Flag::C)) {
+							shortJump(offset);
+						}
+						break;
+					}
+					case Opcode_Exact::RLCA:
+						rotate(Opcode_Register::A, false, false);
+						break;
+					case Opcode_Exact::RLA:
+						rotate(Opcode_Register::A, false, true);
+						break;
 					case Opcode_Exact::RRCA:
 						rotate(Opcode_Register::A, true, false);
 						break;
 					case Opcode_Exact::RRA:
 						rotate(Opcode_Register::A, true, true);
+						break;
+					case Opcode_Exact::DAA:
+						DAA();
+						break;
+					case Opcode_Exact::SCF:
+						setFlag(Flag::C);
 						break;
 					case Opcode_Exact::CPL:
 						setRegister(Register::A, ~getRegister(Register::A));
@@ -177,9 +150,12 @@ namespace gb_emu
 					case Opcode_Exact::CCF:
 						toggleFlag(Flag::C);
 						break;
+					case Opcode_Exact::LD_nn_SP:
+						setDouble(fetchDouble(), SP);
+						break;
 					}
-				}
 					break;
+				}
 				}
 			}
 				break;
