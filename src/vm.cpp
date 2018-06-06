@@ -716,7 +716,7 @@ namespace gb_emu
 	void VM::doPrefixCBCommand()
 	{
 		uint8_t instruction = getByte(PC++);
-		Register reg = static_cast<Register>(instruction & 0x3);
+		Opcode_Register reg = static_cast<Opcode_Register>(instruction & 0x3);
 		switch(static_cast<Opcode_Prefix_Group>(instruction) & Opcode_Prefix_Group::MASK)
 		{
 		case Opcode_Prefix_Group::MISC1:
@@ -729,7 +729,7 @@ namespace gb_emu
 				clearFlags();
 				uint8_t carryMask = bit3 ? 0x1 : 0x80;
 				uint8_t rotateInMask = bit3 ? 0x80 : 0x1;
-				uint8_t regVal = getRegister(reg);
+				uint8_t regVal = readValue(reg);
 				setFlag(Flag::C, regVal & carryMask);
 				if(bit3)
 					regVal >>= 1;
@@ -739,7 +739,7 @@ namespace gb_emu
 					regVal |= rotateInMask;
 				}
 				setFlag(Flag::Z, regVal == 0);
-				setRegister(reg, regVal);
+				writeValue(reg, regVal);
 			}
 				break;
 			case Opcode_Prefix_Misc1_Command_Groups::ROTATE_THRU_CARRY:
@@ -748,7 +748,7 @@ namespace gb_emu
 				clearFlags();
 				uint8_t carryMask = bit3 ? 0x1 : 0x80;
 				uint8_t rotateInMask = bit3 ? 0x80 : 0x1;
-				uint8_t regVal = getRegister(reg);
+				uint8_t regVal = readValue(reg);
 				setFlag(Flag::C, regVal & carryMask);
 				if(bit3)
 					regVal >>= 1;
@@ -758,7 +758,7 @@ namespace gb_emu
 					regVal |= rotateInMask;
 				}
 				setFlag(Flag::Z, regVal == 0);
-				setRegister(reg, regVal);
+				writeValue(reg, regVal);
 			}
 				break;
 			case Opcode_Prefix_Misc1_Command_Groups::SHIFT:
@@ -771,7 +771,7 @@ namespace gb_emu
 		case Opcode_Prefix_Group::TEST_BIT:
 		{
 			uint8_t bit = (instruction >> 3) & 0x3;
-			setFlag(Flag::Z, getRegister(reg) & (1 << bit));
+			setFlag(Flag::Z, readValue(reg) & (1 << bit));
 			setFlag(Flag::H);
 			clearFlag(Flag::N);
 		}
@@ -779,13 +779,13 @@ namespace gb_emu
 		case Opcode_Prefix_Group::CLEAR_BIT:
 		{
 			uint8_t bit = (instruction >> 3) & 0x3;
-			setRegister(reg, getRegister(reg) & ~(1 << bit));
+			writeValue(reg, readValue(reg) & ~(1 << bit));
 		}
 			break;
 		case Opcode_Prefix_Group::SET_BIT:
 		{
 			uint8_t bit = (instruction >> 3) & 0x3;
-			setRegister(reg, getRegister(reg) & (1 << bit));
+			writeValue(reg, readValue(reg) & (1 << bit));
 		}
 			break;
 		}
