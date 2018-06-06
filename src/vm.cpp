@@ -401,9 +401,11 @@ namespace gb_emu
 					break;
 				case Opcode_Misc2_Command_Groups::RST_1:
 				case Opcode_Misc2_Command_Groups::RST_2:
+				{
 					uint8_t rst_address = (instruction >> 3) & 0xF;
 					push_double(PC);
 					longJump(rst_address);
+				}
 					break;
 				default:
 				{
@@ -500,6 +502,46 @@ namespace gb_emu
 						uint16_t addr = getByte(PC++);
 						addr |= (getByte(PC++) << 8);
 						if(getFlag(Flag::C)) call(addr);
+					}
+					break;
+					case Opcode_Exact::LDH_n_A:
+						setByte(getByte(PC++), getRegister(Register::A));
+					break;
+					case Opcode_Exact::LDH_A_n:
+						setRegister(Register::A, getByte(getByte(PC++)));
+						break;
+					case Opcode_Exact::LD_offsetC_A:
+						setByte(getRegister(Register::C), getRegister(Register::A));
+						break;
+					case Opcode_Exact::LD_A_offsetC:
+						setRegister(Register::A, getByte(getRegister(Register::C)));
+						break;
+					case Opcode_Exact::LD_nn_A:
+					{
+						uint16_t addr = getByte(PC++);
+						addr |= (getByte(PC++) << 8);
+						setRegister(Register::A, getByte(addr));
+					}
+					break;
+					case Opcode_Exact::LD_A_nn:
+					{
+						uint16_t addr = getByte(PC++);
+						addr |= (getByte(PC++) << 8);
+						setByte(addr, getRegister(Register::A));
+					}
+					break;
+					case Opcode_Exact::LD_SP_HL:
+						SP = getRegister(RegisterPair::HL);
+						break;
+					case Opcode_Exact::LDHL_SP_n:
+					{
+						clearFlags();
+						uint8_t offset = getByte(PC++);
+						uint16_t addr = SP + offset;
+						setRegister(RegisterPair::HL, addr);
+						uint16_t carry = addr ^ SP ^ offset;
+						setFlag(Flag::H, carry & 0x10);
+						setFlag(Flag::C, SP > 0xFFFF - offset);
 					}
 					break;
 					}
