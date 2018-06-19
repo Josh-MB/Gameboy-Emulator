@@ -81,6 +81,8 @@ namespace gb_emu
 
 		uint16_t SP = 0xFFFE;
 		uint16_t PC = 0;
+		uint32_t cycleCounter = 0;
+		inline void cycles(uint32_t num) { cycleCounter += num; }
 
 		// Union for handling 8 bit registers and addressing them as pairs
 		union {
