@@ -24,7 +24,7 @@ namespace gb_emu
 						setRegister(RegisterPair::HL, getRegister(RegisterPair::HL) + 1);
 					else if(reg == Opcode_Register_Pair_Address::HL_minus)
 						setRegister(RegisterPair::HL, getRegister(RegisterPair::HL) - 1);
-					setByte(addr, value);
+					mem.setByte(addr, value);
 					break;
 				}
 				case Opcode_Misc1_Command_Groups::LD_r1_d8_1:
@@ -35,7 +35,7 @@ namespace gb_emu
 				{
 					Opcode_Register_Pair_Address reg = decodeRegisterPairAddress(instruction);
 					uint16_t addr = readValue(reg);
-					uint8_t value = getByte(addr);
+					uint8_t value = mem.getByte(addr);
 					if(reg == Opcode_Register_Pair_Address::HL_plus)
 						setRegister(RegisterPair::HL, getRegister(RegisterPair::HL) + 1);
 					else if(reg == Opcode_Register_Pair_Address::HL_minus)
@@ -146,7 +146,7 @@ namespace gb_emu
 						toggleFlag(Flag::C);
 						break;
 					case Opcode_Exact::LD_nn_SP:
-						setDouble(fetchDouble(), SP);
+						mem.setDouble(fetchDouble(), SP);
 						break;
 					}
 					break;
@@ -271,22 +271,22 @@ namespace gb_emu
 						break;
 					}
 					case Opcode_Exact::LDH_n_A:
-						setByte(fetchByte(), getRegister(Register::A));
+						mem.setByte(fetchByte(), getRegister(Register::A));
 						break;
 					case Opcode_Exact::LDH_A_n:
-						setRegister(Register::A, getByte(fetchByte()));
+						setRegister(Register::A, mem.getByte(fetchByte()));
 						break;
 					case Opcode_Exact::LD_offsetC_A:
-						setByte(getRegister(Register::C), getRegister(Register::A));
+						mem.setByte(getRegister(Register::C), getRegister(Register::A));
 						break;
 					case Opcode_Exact::LD_A_offsetC:
-						setRegister(Register::A, getByte(getRegister(Register::C)));
+						setRegister(Register::A, mem.getByte(getRegister(Register::C)));
 						break;
 					case Opcode_Exact::LD_nn_A:
-						setByte(fetchDouble(), getRegister(Register::A));
+						mem.setByte(fetchDouble(), getRegister(Register::A));
 						break;
 					case Opcode_Exact::LD_A_nn:
-						setRegister(Register::A, getByte(fetchDouble()));
+						setRegister(Register::A, mem.getByte(fetchDouble()));
 						break;
 					case Opcode_Exact::LD_SP_HL:
 						SP = getRegister(RegisterPair::HL);
@@ -331,7 +331,7 @@ namespace gb_emu
 	uint8_t VM::readValue(Opcode_Register r) const
 	{
 		if(r == Opcode_Register::HL) {
-			return getByte(registerPairs[toUType(RegisterPair::HL)]);
+			return mem.getByte(registerPairs[toUType(RegisterPair::HL)]);
 		}
 		else {
 			return getRegister(getRegister_from_OpcodeRegister(r));
@@ -355,7 +355,7 @@ namespace gb_emu
 	void VM::writeValue(Opcode_Register r, uint8_t value)
 	{
 		if(r == Opcode_Register::HL) {
-			setByte(registerPairs[toUType(RegisterPair::HL)], value);
+			mem.setByte(registerPairs[toUType(RegisterPair::HL)], value);
 		}
 		else {
 			setRegister(getRegister_from_OpcodeRegister(r), value);
@@ -425,7 +425,7 @@ namespace gb_emu
 
 	void VM::push(uint8_t value)
 	{
-		setByte(--SP, value);
+		mem.setByte(--SP, value);
 	}
 	void VM::push_double(uint16_t value)
 	{
@@ -434,7 +434,7 @@ namespace gb_emu
 	}
 	uint8_t VM::pop()
 	{
-		return getByte(SP++);
+		return mem.getByte(SP++);
 	}
 	uint16_t VM::pop_double()
 	{

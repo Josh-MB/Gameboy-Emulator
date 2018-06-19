@@ -3,6 +3,7 @@
 #include "common.hpp"
 #include "op_code.hpp"
 #include "debug.hpp"
+#include "mem.hpp"
 #include <cstdint>
 
 namespace gb_emu
@@ -74,8 +75,9 @@ namespace gb_emu
 
 	class VM {
 	public:
-	private:
+		VM() { mem.loadFromFile("DMG_ROM.bin"); }
 		ExecuteResult run();
+	private:
 
 		uint16_t SP = 0xFFFE;
 		uint16_t PC = 0;
@@ -88,16 +90,13 @@ namespace gb_emu
 			uint16_t registerPairs[5];
 		};
 
-
+		MMU mem;
 		
-		// 16 bytes of memory
-		uint8_t memory[0xFFFF];
-
 		/**
 		 * Fetches the next byte and increments the program counter
 		 */
 		uint8_t fetchByte() {
-			return getByte(PC++);
+			return mem.getByte(PC++);
 		}
 
 		/**
@@ -105,8 +104,8 @@ namespace gb_emu
 		 * twice. Assumes LSB stored first.
 		 */
 		uint16_t fetchDouble() {
-			uint16_t ret = getByte(PC++);
-			ret |= (getByte(PC++) << 8);
+			uint16_t ret = mem.getDouble(PC);
+			PC += 2;
 			return ret;
 		}
 		/**
@@ -164,42 +163,6 @@ namespace gb_emu
 		 */
 		void setRegister(RegisterPair r, uint16_t value) {
 			registerPairs[toUType(r)] = value;
-		}
-
-		/**
-		 * Get byte from memory offset ($FF00 + addr)
-		 */
-		uint8_t getByte(uint8_t address) const {
-			return memory[0xFF00 + address];
-		}
-
-		/**
-		 * Get byte from 16 bit memory address
-		 */
-		uint8_t getByte(uint16_t address) const {
-			return memory[address];
-		}
-
-		/**
-		 * Set byte at memory offset ($FF00 + addr)
-		 */
-		void setByte(uint8_t address, uint8_t value) {
-			memory[0xFF00 + address] = value;
-		}
-
-		/**
-		 * Set byte at 16 bit memory address
-		 */
-		void setByte(uint16_t address, uint8_t value) {
-			memory[address] = value;
-		}
-
-		/**
-		 * Write double to memory, with LSB first
-		 */
-		void setDouble(uint16_t address, uint16_t value) {
-			memory[address] = static_cast<uint8_t>(value & 0xFF);
-			memory[address + 1] = static_cast<uint8_t>(value >> 8);
 		}
 
 		/**
