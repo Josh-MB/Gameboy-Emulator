@@ -1,6 +1,7 @@
 #include "..\include\mem.hpp"
 #include <filesystem>
 #include <cstdio>
+#include <gsl/gsl_util>
 namespace fs = std::filesystem;
 
 namespace gb_emu
@@ -14,17 +15,27 @@ namespace gb_emu
 			return;
 		}
 		auto size = fs::file_size(p);
-		if(size > 0xFFFF) {
-			fprintf(stderr, "File too big for GB memory: %s\n", path.c_str());
+		// 8 MB is the hard cap for a cartridge ROM, I believe.
+		// At least 4 MB is needed for all possible switchable ROM banks
+		if(size > MAX_CARTRIDGE_SIZE) {
+			fprintf(stderr, "File too big for GB cartridge: %s\n", path.c_str());
 			return;
 		}
 
 		std::FILE* fp = std::fopen(path.c_str(), "rb");
-		uint8_t tempMem[0xFFFF];
+
+		// Make sure file handle gets closed regardless of exceptions
+		auto cleanup = gsl::finally([&] {std::fclose(fp); });
 
 		try {
-			std::fread(&(tempMem[0]), sizeof(tempMem[0]), static_cast<size_t>(size), fp);
-			std::memcpy(&(memory[0]), &(tempMem[0]), MEM_SIZE);
+			// We know from above that size can't be bigger than MAX_CARTRIDGE_SIZE
+			// so this narrowing cast is fine
+			size_t sz = static_cast<size_t>(size);
+			cartridgeROM.resize(sz);
+			std::fread(&(cartridgeROM[0]), sizeof(cartridgeROM[0]), sz, fp);
+
+			// Copy the first ROM block over to system ram
+			std::memcpy(&(memory[0]), &(cartridgeROM[0]), ROM_BLOCK_SIZE);
 		}
 		catch(std::exception &e) {
 			fprintf(stderr, "Error reading file: %s with error %s\n", path.c_str(), e.what());

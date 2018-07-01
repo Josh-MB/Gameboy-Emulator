@@ -3,6 +3,7 @@
 #include "common.hpp"
 #include <cstdint>
 #include <string>
+#include <vector>
 
 namespace gb_emu
 {
@@ -11,8 +12,12 @@ namespace gb_emu
 	private:
 		// Address range 0x0000 to 0xFFFF
 		static constexpr size_t MEM_SIZE = 0x10000;
+		static constexpr size_t MAX_CARTRIDGE_SIZE = 0x800000;
+		static constexpr size_t ROM_BLOCK_SIZE = 0x4000;
 
 		uint8_t memory[MEM_SIZE];
+
+		std::vector<uint8_t> cartridgeROM;
 
 	public:
 		void loadFromFile(std::string path);

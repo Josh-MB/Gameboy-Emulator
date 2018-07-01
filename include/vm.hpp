@@ -92,6 +92,12 @@ namespace gb_emu
 			uint16_t registerPairs[5];
 		};
 
+		/* 
+		 * EI sets the interrupt enable flag after the next instruction.
+		 * So EI sets this to 1. After each instruction the cpu shifts this
+		 * "register" left one. If this register is equal to 0x3, we set the
+		 * interrupt flag and clear this register
+		 */
 		uint8_t interruptEnablePending = 0;
 
 		MMU mem;

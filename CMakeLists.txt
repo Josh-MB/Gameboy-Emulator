@@ -62,6 +62,14 @@ set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH}")
 find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIRS})
 
+SET(GSL_INCLUDE_DIR "" CACHE PATH "Path to gsl")
+if(NOT EXISTS "${GSL_INCLUDE_DIR}/gsl")
+	message(SEND_ERROR "Can't find gsl in ${GSL_INCLUDE_DIR}")
+else()
+	message("-- Found gsl")
+endif()
+INCLUDE_DIRECTORIES(${GSL_INCLUDE_DIR})
+
 enable_testing()
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIR})
