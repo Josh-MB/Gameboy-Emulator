@@ -490,7 +490,7 @@ namespace gb_emu
 		DI = 0xF3,
 
 		// EI (p.98)
-		// Enable interrupts after this instruction. 4 cycles
+		// Enable interrupts after next instruction. 4 cycles
 		EI = 0xFB,
 
 		// RLCA (p.99)

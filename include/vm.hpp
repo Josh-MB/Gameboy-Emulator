@@ -92,8 +92,11 @@ namespace gb_emu
 			uint16_t registerPairs[5];
 		};
 
+		uint8_t interruptEnablePending = 0;
+
 		MMU mem;
 		
+		ExecuteResult fetchDecodeExecute();
 		/**
 		 * Fetches the next byte and increments the program counter
 		 */
