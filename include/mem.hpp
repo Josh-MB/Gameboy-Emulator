@@ -22,9 +22,11 @@ namespace gb_emu
 	public:
 		void loadFromFile(std::string path);
 		inline uint8_t getZeroPageByte(uint8_t addr) const { return memory[0xFF00 + addr]; }
-		inline uint8_t getByte(uint16_t addr) const { return memory[addr]; }
 		inline void setZeroPageByte(uint8_t addr, uint8_t value) { memory[0xFF00 + addr] = value; }
-		inline void setByte(uint16_t addr, uint8_t value) { memory[addr] = value; }
+
+
+		uint8_t getByte(uint16_t addr) const;
+		void setByte(uint16_t addr, uint8_t value);
 
 		/**
 		* Fetches the next double byte, and increments program counter

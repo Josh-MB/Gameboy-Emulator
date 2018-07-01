@@ -1,4 +1,5 @@
 #include "..\include\mem.hpp"
+#include "..\include\reservedAddresses.hpp"
 #include <filesystem>
 #include <cstdio>
 #include <gsl/gsl_util>
@@ -41,5 +42,22 @@ namespace gb_emu
 			fprintf(stderr, "Error reading file: %s with error %s\n", path.c_str(), e.what());
 			return;
 		}
+	}
+	uint8_t MMU::getByte(uint16_t addr) const
+	{
+		return memory[addr];
+	}
+
+	void  MMU::setByte(uint16_t addr, uint8_t value)
+	{
+		// Perform echo writes
+		if(addr >= WORKING_RAM_BANK && addr <= WORKING_RAM_BANK_ECHO_END) {
+			memory[addr + ECHO_OFFSET] = value;
+		}
+		if(addr >= ECHO_RAM_BANK && addr <= ECHO_RAM_BANK_END) {
+			memory[addr - ECHO_OFFSET] = value;
+		}
+
+		memory[addr] = value;
 	}
 }
