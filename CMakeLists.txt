@@ -59,6 +59,9 @@ set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH}")
 
 #find_package(SFML COMPONENTS graphics window system)
 
+find_package(SDL2 REQUIRED)
+include_directories(${SDL2_INCLUDE_DIRS})
+
 enable_testing()
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIR})
@@ -99,6 +102,8 @@ source_group("include" FILES ${HPP_MAIN})
 target_include_directories(gb_emu
 	PRIVATE ${CMAKE_SOURCE_DIR}/thirdparty_include)
 #	PRIVATE ${SFML_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/thirdparty_include)
+
+target_link_libraries(gb_emu ${SDL2_LIBRARIES})
 
 if(WIN32)
 	if(NOT CMAKE_VERSION VERSION_LESS "3.8")
