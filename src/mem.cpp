@@ -49,8 +49,8 @@ namespace gb_emu
 			std::fread(&(cartridgeROM[0]), sizeof(cartridgeROM[0]), sz, fp);
 
 			// Copy the first ROM block over to system ram
-			std::memcpy(&(memory[0]), &(cartridgeROM[0]), ROM_BLOCK_SIZE);
-			std::memcpy(&(memory[1]), &(cartridgeROM[1]), ROM_BLOCK_SIZE);
+			std::memcpy(&(memory[FIXED_ROM_BANK]), &(cartridgeROM[0]), ROM_BLOCK_SIZE);
+			std::memcpy(&(memory[SWITCHABLE_ROM_BANK]), &(cartridgeROM[ROM_BLOCK_SIZE]), ROM_BLOCK_SIZE);
 
 			// Check the cartridge type and set the correct MBC
 			switch(memory[CARTRIDGE_TYPE_FLAG]) {

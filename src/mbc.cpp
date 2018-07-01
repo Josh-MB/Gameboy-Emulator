@@ -16,8 +16,11 @@ namespace gb_emu
 			// RomBanks 0x00, 0x20, 0x40, 0x60 -> 0x01, 0x21, 0x41, 0x61
 			if(romBank == 0) romBank += 1;
 			//Where are rom blocks stored? I think from address 0?
-			std::memcpy(&(memory[0]), &(cartridgeROM[romBank * ROM_BLOCK_SIZE]), ROM_BLOCK_SIZE);
-
+			std::memcpy(&(memory[SWITCHABLE_ROM_BANK]), &(cartridgeROM[romBank * ROM_BLOCK_SIZE]), ROM_BLOCK_SIZE);
 		}
+		else if(addr >= 0x6000 && addr < 0x7FFF) {
+			ROMBanking = (byte & 0x1);
+		}
+		// Handle ROM/RAM banking mode somehow
 	}
 }

@@ -17,6 +17,7 @@ namespace gb_emu
 	{
 	public:
 		virtual void captureWrite(uint16_t addr, uint8_t byte, const std::vector<uint8_t>& cartridgeROM, uint8_t* memory) = 0;
+		virtual ~MBC() {}
 	};
 
 	/**
@@ -26,12 +27,15 @@ namespace gb_emu
 	{
 	public:
 		virtual void captureWrite(uint16_t addr, uint8_t byte, const std::vector<uint8_t>& cartridgeROM, uint8_t* memory) override;
-	private:
+		~MBC_Null() = default;
 	};
 
 	class MBC1 : public MBC
 	{
 	public:
 		virtual void captureWrite(uint16_t addr, uint8_t byte, const std::vector<uint8_t>& cartridgeROM, uint8_t* memory) override;
+		~MBC1() = default;
+	private:
+		bool ROMBanking = true;
 	};
 }
