@@ -278,8 +278,8 @@ namespace gb_emu
 						break;
 					case Opcode_Exact::RETI:
 						ret();
+						enableInterrupts();
 						cycles(16);
-						// todo: enable interrupts
 						break;
 					case Opcode_Exact::JP_NZ_nn:
 					{
@@ -390,19 +390,19 @@ namespace gb_emu
 						break;
 					}
 					case Opcode_Exact::LDH_n_A:
-						mem.setByte(fetchByte(), getRegister(Register::A));
+						mem.setZeroPageByte(fetchByte(), getRegister(Register::A));
 						cycles(12);
 						break;
 					case Opcode_Exact::LDH_A_n:
-						setRegister(Register::A, mem.getByte(fetchByte()));
+						setRegister(Register::A, mem.getZeroPageByte(fetchByte()));
 						cycles(12);
 						break;
 					case Opcode_Exact::LD_offsetC_A:
-						mem.setByte(getRegister(Register::C), getRegister(Register::A));
+						mem.setZeroPageByte(getRegister(Register::C), getRegister(Register::A));
 						cycles(8);
 						break;
 					case Opcode_Exact::LD_A_offsetC:
-						setRegister(Register::A, mem.getByte(getRegister(Register::C)));
+						setRegister(Register::A, mem.getZeroPageByte(getRegister(Register::C)));
 						cycles(8);
 						break;
 					case Opcode_Exact::LD_nn_A:
@@ -584,9 +584,11 @@ namespace gb_emu
 	}
 	void VM::enableInterrupts()
 	{
+		mem.setByte(0xFFFF, 1);
 	}
 	void VM::disableInterrupts()
 	{
+		mem.setByte(0xFFFF, 0);
 	}
 	void VM::doPrefixCBCommand()
 	{
