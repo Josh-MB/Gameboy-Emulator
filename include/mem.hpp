@@ -1,25 +1,27 @@
 #pragma once
 
 #include "common.hpp"
+#include "reservedAddresses.hpp"
 #include <cstdint>
 #include <string>
 #include <vector>
 
 namespace gb_emu
 {
+	class MBC;
+
 	class MMU
 	{
 	private:
-		// Address range 0x0000 to 0xFFFF
-		static constexpr size_t MEM_SIZE = 0x10000;
-		static constexpr size_t MAX_CARTRIDGE_SIZE = 0x800000;
-		static constexpr size_t ROM_BLOCK_SIZE = 0x4000;
-
 		uint8_t memory[MEM_SIZE];
 
 		std::vector<uint8_t> cartridgeROM;
 
+		MBC* mbc = nullptr;
+
+		void clear();
 	public:
+		~MMU();
 		void loadFromFile(std::string path);
 		inline uint8_t getZeroPageByte(uint8_t addr) const { return memory[0xFF00 + addr]; }
 		inline void setZeroPageByte(uint8_t addr, uint8_t value) { memory[0xFF00 + addr] = value; }

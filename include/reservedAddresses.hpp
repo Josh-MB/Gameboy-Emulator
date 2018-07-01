@@ -10,6 +10,10 @@ namespace gb_emu
 {
 	enum ReservedAddresses : uint16_t {
 		FIXED_ROM_BANK = 0x0000,
+
+		/** Cartridge header info */
+		CARTRIDGE_TYPE_FLAG = 0x0147,
+
 		FIXED_ROM_BANK_END = 0x3FFF,
 		SWITCHABLE_ROM_BANK = 0x4000,
 		SWITCHABLE_ROM_BANK_END = 0x7FFF,
@@ -36,4 +40,9 @@ namespace gb_emu
 
 		INTERRUPT_ENABLE = 0xFFFF,
 	};
+
+	// Address range 0x0000 to 0xFFFF
+	constexpr size_t MEM_SIZE = 0x10000;
+	constexpr size_t MAX_CARTRIDGE_SIZE = 0x800000;
+	constexpr size_t ROM_BLOCK_SIZE = 0x4000;
 }
