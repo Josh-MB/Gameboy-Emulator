@@ -75,7 +75,7 @@ namespace gb_emu
 
 	class VM {
 	public:
-		VM() { mem.loadFromFile("DMG_ROM.bin"); }
+		VM() { mem.loadFromFile("Tetris (W) (V1.0) [!].gb"); }
 		ExecuteResult run();
 	private:
 

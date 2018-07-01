@@ -74,6 +74,11 @@ namespace gb_emu
 			case Opcode_Misc1_Command_Groups::INC_r_1:
 			case Opcode_Misc1_Command_Groups::INC_r_2:
 				clearFlag(Flag::C);
+				// todo: This breaks when using (HL) because (HL) refers to memory
+				// and so thinks it's accessing an incorrect register. I just forgot
+				// to handle (HL) in ADC. I think I just need to change get/setRegister
+				// to write/readValue (which handles (HL) in ADC, but need to check
+				// further
 				ADC(getRegister_from_OpcodeRegister(decodeRegister(instruction)), 1);
 				cycles(4);
 				break;
