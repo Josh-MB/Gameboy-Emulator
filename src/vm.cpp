@@ -79,7 +79,7 @@ namespace gb_emu
 				// to handle (HL) in ADC. I think I just need to change get/setRegister
 				// to write/readValue (which handles (HL) in ADC, but need to check
 				// further
-				ADC(getRegister_from_OpcodeRegister(decodeRegister(instruction)), 1);
+				ADC(decodeRegister(instruction), 1);
 				cycles(4);
 				break;
 			case Opcode_Misc1_Command_Groups::INC_rr:
@@ -93,7 +93,7 @@ namespace gb_emu
 			case Opcode_Misc1_Command_Groups::DEC_r_1:
 			case Opcode_Misc1_Command_Groups::DEC_r_2:
 				clearFlag(Flag::C);
-				SBC(getRegister_from_OpcodeRegister(decodeRegister(instruction)), 1);
+				SBC(decodeRegister(instruction), 1);
 				cycles(4);
 				break;
 			case Opcode_Misc1_Command_Groups::DEC_rr:
@@ -538,9 +538,9 @@ namespace gb_emu
 		}
 	}
 
-	void VM::ADC(Register r, uint8_t b)
+	void VM::ADC(Opcode_Register r, uint8_t b)
 	{
-		uint8_t regValue = getRegister(r);
+		uint8_t regValue = readValue(r);
 		uint8_t outValue;
 		if(getFlag(Flag::C))
 		{
@@ -554,11 +554,11 @@ namespace gb_emu
 		}
 		uint8_t carryIns = regValue ^ b ^ outValue;
 		setFlag(Flag::H, carryIns & 0x10);
-		setRegister(r, outValue);
+		writeValue(r, outValue);
 		clearFlag(Flag::N);
 		setFlag(Flag::Z, outValue == 0);
 	}
-	void VM::SBC(Register r, uint8_t b)
+	void VM::SBC(Opcode_Register r, uint8_t b)
 	{
 		// a - b - c = a + ~b + 1 - c = a + ~b + !c
 		toggleFlag(Flag::C);
@@ -713,19 +713,19 @@ namespace gb_emu
 		case Opcode_Arithmetic_Command::ADD:
 			// Perform an ADC with no carry bit
 			clearFlag(Flag::C);
-			ADC(Register::A, operand);
+			ADC(Opcode_Register::A, operand);
 			break;
 		case Opcode_Arithmetic_Command::ADC:
-			ADC(Register::A, operand);
+			ADC(Opcode_Register::A, operand);
 			break;
 		case Opcode_Arithmetic_Command::SUB:
 			// Perform an SBC with "no" carry bit (Since it is
 			// sub, we invert the meaning of carry and so set C)
 			clearFlag(Flag::C);
-			SBC(Register::A, operand);
+			SBC(Opcode_Register::A, operand);
 			break;
 		case Opcode_Arithmetic_Command::SBC:
-			SBC(Register::A, operand);
+			SBC(Opcode_Register::A, operand);
 			break;
 		case Opcode_Arithmetic_Command::AND:
 		{
@@ -756,7 +756,7 @@ namespace gb_emu
 			// CP is just a sub command, but with the result thrown away
 			// so we reset A to its original value
 			clearFlags();
-			SBC(Register::A, operand);
+			SBC(Opcode_Register::A, operand);
 			setRegister(Register::A, regA);
 			break;
 		}

@@ -232,8 +232,8 @@ namespace gb_emu
 			PC = addr;
 		}
 
-		void ADC(Register r, uint8_t b);
-		void SBC(Register r, uint8_t b);
+		void ADC(Opcode_Register r, uint8_t b);
+		void SBC(Opcode_Register r, uint8_t b);
 		void DAA();
 
 		void push(uint8_t value);
