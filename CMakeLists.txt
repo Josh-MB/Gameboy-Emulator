@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.6 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 project(gb_emu VERSION 0.1 LANGUAGES CXX)
 
 # Prevent in source builds
@@ -114,9 +114,5 @@ target_include_directories(gb_emu
 target_link_libraries(gb_emu ${SDL2_LIBRARIES})
 
 if(WIN32)
-	if(NOT CMAKE_VERSION VERSION_LESS "3.8")
-		set_target_properties(gb_emu PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/\$(Configuration)")
-	else()
-		message(SEND_ERROR "Needs CMake 3.8+")
-	endif()
+	set_target_properties(gb_emu PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/\$(Configuration)")
 endif()
